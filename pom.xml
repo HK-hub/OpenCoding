@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.hk.opencoding</groupId>
+    <artifactId>OpenCoding</artifactId>
+    <version>${opencoding.project.version}</version>
+    <packaging>pom</packaging>
+
+    <name>OpenCoding</name>
+    <description>OpenCoding parent project</description>
+
+    <modules>
+        <module>open-coding-core</module>
+        <module>open-coding-bootstrap</module>
+        <module>open-coding-common</module>
+    </modules>
+
+    <!-- =========================================================== -->
+    <!--  Project-wide version & encoding properties                 -->
+    <!-- =========================================================== -->
+    <properties>
+        <opencoding.project.version>0.0.1</opencoding.project.version>
+        <java.version>21</java.version>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <!-- Spring Boot -->
+        <spring-boot.version>3.4.1</spring-boot.version>
+
+        <!-- Redisson -->
+        <redisson.version>3.36.0</redisson.version>
+
+        <!-- MapStruct -->
+        <mapstruct.version>1.6.3</mapstruct.version>
+
+        <!-- Apache Commons -->
+        <commons-lang3.version>3.17.0</commons-lang3.version>
+        <commons-collections4.version>4.5.0</commons-collections4.version>
+        <commons-io.version>2.18.0</commons-io.version>
+        <commons-codec.version>1.17.1</commons-codec.version>
+
+        <!-- OpenAPI / Swagger UI -->
+        <springdoc-openapi.version>2.6.0</springdoc-openapi.version>
+
+        <!-- MyBatis-Plus (Spring Boot 3.x line) -->
+        <mybatis-plus.version>3.5.14</mybatis-plus.version>
+
+        <!-- dotenv-java (.env file loader) -->
+        <dotenv-java.version>3.0.2</dotenv-java.version>
+
+        <!-- Anthropic Java SDK -->
+        <anthropic-java.version>2.57.0</anthropic-java.version>
+
+        <!-- Lombok -->
+        <lombok.version>1.18.34</lombok.version>
+    </properties>
+
+    <!-- =========================================================== -->
+    <!--  Centralised dependency version management                  -->
+    <!-- =========================================================== -->
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- Redisson — the starter is the only one referenced by child
+                 modules. The matching redisson-spring-data-XX artifact (if
+                 Spring Data Redis integration is needed) is added per-module
+                 to avoid version-mismatch surprises on BOM upgrades. -->
+            <dependency>
+                <groupId>org.redisson</groupId>
+                <artifactId>redisson-spring-boot-starter</artifactId>
+                <version>${redisson.version}</version>
+            </dependency>
+
+            <!-- MapStruct -->
+            <dependency>
+                <groupId>org.mapstruct</groupId>
+                <artifactId>mapstruct</artifactId>
+                <version>${mapstruct.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mapstruct</groupId>
+                <artifactId>mapstruct-processor</artifactId>
+                <version>${mapstruct.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${lombok.version}</version>
+            </dependency>
+
+            <!-- Apache Commons -->
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${commons-lang3.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-collections4</artifactId>
+                <version>${commons-collections4.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>${commons-io.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-codec</groupId>
+                <artifactId>commons-codec</artifactId>
+                <version>${commons-codec.version}</version>
+            </dependency>
+
+            <!-- OpenAPI / Swagger UI -->
+            <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+                <version>${springdoc-openapi.version}</version>
+            </dependency>
+
+            <!-- MyBatis-Plus -->
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
+                <version>${mybatis-plus.version}</version>
+            </dependency>
+
+            <!-- dotenv-java -->
+            <dependency>
+                <groupId>io.github.cdimascio</groupId>
+                <artifactId>dotenv-java</artifactId>
+                <version>${dotenv-java.version}</version>
+            </dependency>
+
+            <!-- Anthropic Java SDK -->
+            <dependency>
+                <groupId>com.anthropic</groupId>
+                <artifactId>anthropic-java</artifactId>
+                <version>${anthropic-java.version}</version>
+            </dependency>
+
+            <!-- Inter-module: the core module -->
+            <dependency>
+                <groupId>com.hk.opencoding</groupId>
+                <artifactId>open-coding-common</artifactId>
+                <version>${opencoding.project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.hk.opencoding</groupId>
+                <artifactId>open-coding-core</artifactId>
+                <version>${opencoding.project.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <!-- =========================================================== -->
+    <!--  Plugin management                                           -->
+    <!--  Lombok + MapStruct are wired through annotationProcessorPaths
+          so the MapStruct processor can see Lombok-generated accessors. -->
+    <!-- =========================================================== -->
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <version>${spring-boot.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.13.0</version>
+                    <configuration>
+                        <source>${java.version}</source>
+                        <target>${java.version}</target>
+                        <encoding>${project.build.sourceEncoding}</encoding>
+                        <annotationProcessorPaths>
+                            <path>
+                                <groupId>org.projectlombok</groupId>
+                                <artifactId>lombok</artifactId>
+                                <version>${lombok.version}</version>
+                            </path>
+                            <path>
+                                <groupId>org.mapstruct</groupId>
+                                <artifactId>mapstruct-processor</artifactId>
+                                <version>${mapstruct.version}</version>
+                            </path>
+                        </annotationProcessorPaths>
+                        <compilerArgs>
+                            <arg>-Amapstruct.defaultComponentModel=spring</arg>
+                            <arg>-Amapstruct.defaultInjectionStrategy=constructor</arg>
+                            <arg>-Amapstruct.nullValuePropertyMappingStrategy=ignore</arg>
+                        </compilerArgs>
+                    </configuration>
+                </plugin>
+
+                <!-- 统一项目版本 -->
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>flatten-maven-plugin</artifactId>
+                    <version>1.6.0</version>
+                    <extensions>true</extensions>
+                    <configuration>
+                        <updatePomFile>true</updatePomFile>
+                        <flattenMode>resolveCiFriendliesOnly</flattenMode>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>flatten</id>
+                            <phase>process-resources</phase>
+                            <goals>
+                                <goal>flatten</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>flatten-clean</id>
+                            <phase>clean</phase>
+                            <goals>
+                                <goal>clean</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+</project>

@@ -1,0 +1,51 @@
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+.kotlin
+*.class
+
+### IntelliJ IDEA ###
+.idea/
+*.iws
+*.iml
+*.ipr
+
+### Eclipse ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
+
+### TS
+node_modules/
+dist/
+
+### Mac OS ###
+.DS_Store
+
+### logs
+*.log
+*.log.*
+
+### env files
+# Local .env with secrets — never commit. Track .env.example instead.
+.env
+.env.*
+!.env.example
