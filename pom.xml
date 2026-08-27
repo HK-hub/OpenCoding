@@ -235,6 +235,7 @@
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>flatten-maven-plugin</artifactId>
                     <version>1.6.0</version>
+                    <!-- 重点！extensions必须true，否则maven生命周期早期无法解析version变量 -->
                     <extensions>true</extensions>
                     <configuration>
                         <updatePomFile>true</updatePomFile>

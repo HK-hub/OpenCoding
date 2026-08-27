@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.hk.opencoding</groupId>
         <artifactId>OpenCoding</artifactId>
-        <version>0.0.1</version>
+        <version>${opencoding.project.version}</version>
     </parent>
 
     <artifactId>open-coding-infrastructure</artifactId>

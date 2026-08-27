@@ -12,7 +12,7 @@
 
     <artifactId>open-coding-core</artifactId>
     <name>open-coding-core</name>
-    <description>Core application module — Spring Boot, JPA, Redisson, MapStruct, Anthropic SDK</description>
+    <description>Core application module</description>
 
     <dependencies>
         <dependency>
