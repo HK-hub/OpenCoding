@@ -16,6 +16,10 @@
         <module>open-coding-core</module>
         <module>open-coding-bootstrap</module>
         <module>open-coding-common</module>
+        <module>open-coding-domain</module>
+        <module>open-coding-infrastructure</module>
+        <module>open-coding-application</module>
+        <module>open-coding-interfaces</module>
     </modules>
 
     <!-- =========================================================== -->
@@ -159,7 +163,27 @@
             </dependency>
             <dependency>
                 <groupId>com.hk.opencoding</groupId>
+                <artifactId>open-coding-domain</artifactId>
+                <version>${opencoding.project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.hk.opencoding</groupId>
+                <artifactId>open-coding-infrastructure</artifactId>
+                <version>${opencoding.project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.hk.opencoding</groupId>
                 <artifactId>open-coding-core</artifactId>
+                <version>${opencoding.project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.hk.opencoding</groupId>
+                <artifactId>open-coding-application</artifactId>
+                <version>${opencoding.project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.hk.opencoding</groupId>
+                <artifactId>open-coding-interfaces</artifactId>
                 <version>${opencoding.project.version}</version>
             </dependency>
         </dependencies>

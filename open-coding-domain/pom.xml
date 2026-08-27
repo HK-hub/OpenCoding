@@ -6,10 +6,10 @@
     <parent>
         <groupId>com.hk.opencoding</groupId>
         <artifactId>OpenCoding</artifactId>
-        <version>${opencoding.project.version}</version>
+        <version>0.0.1</version>
     </parent>
 
-    <artifactId>open-coding-common</artifactId>
+    <artifactId>open-coding-domain</artifactId>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
@@ -18,27 +18,28 @@
     </properties>
 
     <dependencies>
-        <!-- ===================== Lombok (compile-time only) ===================== -->
+        <!-- ===================== MyBatis-Plus ===================== -->
         <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
         </dependency>
-        <!-- ===================== Apache Commons ===================== -->
+
+        <!-- ===================== Redisson (Redis client) ===================== -->
         <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
+            <groupId>org.redisson</groupId>
+            <artifactId>redisson-spring-boot-starter</artifactId>
         </dependency>
+
+        <!-- ===================== MapStruct ===================== -->
         <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-collections4</artifactId>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
         </dependency>
+
         <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
+            <groupId>com.hk.opencoding</groupId>
+            <artifactId>open-coding-common</artifactId>
         </dependency>
     </dependencies>
+
 </project>

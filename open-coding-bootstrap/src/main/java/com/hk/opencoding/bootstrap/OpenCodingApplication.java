@@ -30,8 +30,8 @@ import java.io.File;
  */
 @Slf4j
 @EnableCaching
-@MapperScan("com.hk.coding.opencoding.core.mapper")
-@SpringBootApplication
+@MapperScan("com.hk.opencoding")
+@SpringBootApplication(scanBasePackages = "com.hk.opencoding")
 public class OpenCodingApplication {
 
     public static void main(String[] args) {
