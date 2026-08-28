@@ -6,6 +6,7 @@ import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.io.File;
 
@@ -30,7 +31,8 @@ import java.io.File;
  */
 @Slf4j
 @EnableCaching
-@MapperScan("com.hk.opencoding")
+@EnableScheduling
+@MapperScan("com.hk.opencoding.**.mapper")
 @SpringBootApplication(scanBasePackages = "com.hk.opencoding")
 public class OpenCodingApplication {
 

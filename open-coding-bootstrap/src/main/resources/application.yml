@@ -1,6 +1,21 @@
+# ===================== Server =====================
+server:
+  port: ${SERVER_PORT:8080}
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/plain,text/css,application/javascript
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
 spring:
   application:
-    name: open-coding-core
+    name: open-coding
+  threads:
+    virtual:
+      enabled: true
   jackson:
     default-property-inclusion: non_null
     date-format: yyyy-MM-dd HH:mm:ss
@@ -10,7 +25,7 @@ spring:
 
   # ===================== DataSource (PostgreSQL) =====================
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/opencoding?stringtype=unspecified}
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/opencoding}
     username: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
@@ -27,20 +42,11 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true
 
-  # ===================== Redis (lettuce) =====================
+  # ===================== Redis =====================
   data:
     redis:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
-      password: ${REDIS_PASSWORD:}
-      database: ${REDIS_DATABASE:0}
-      timeout: ${REDIS_TIMEOUT:3000ms}
-      lettuce:
-        pool:
-          enabled: ${REDIS_POOL_ENABLED:true}
-          max-active: ${REDIS_POOL_MAX_ACTIVE:16}
-          max-idle: ${REDIS_POOL_MAX_IDLE:8}
-          min-idle: ${REDIS_POOL_MIN_IDLE:2}
 
 # ===================== MyBatis-Plus =====================
 mybatis-plus:
@@ -58,18 +64,6 @@ mybatis-plus:
       logic-delete-value: 1
       logic-not-delete-value: 0
       table-underline: true
-
-# ===================== Server =====================
-server:
-  port: ${SERVER_PORT:8080}
-  compression:
-    enabled: true
-    mime-types: application/json,application/xml,text/html,text/plain,text/css,application/javascript
-  servlet:
-    encoding:
-      charset: UTF-8
-      enabled: true
-      force: true
 
 # ===================== Actuator =====================
 management:
