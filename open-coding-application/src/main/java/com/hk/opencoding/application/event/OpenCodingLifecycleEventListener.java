@@ -5,9 +5,7 @@ import com.hk.opencoding.domain.events.lifecycle.*;
 import com.hk.opencoding.domain.events.tools.ToolInitializeEvent;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 

@@ -1,0 +1,39 @@
+flowchart BT
+    subgraph COMMON["open-coding-common（零 Spring）"]
+        ENUM["枚举 OperationSystem / ProtocolType / ModelCapability<br/>工具类 GitBashDetector"]
+    end
+
+    subgraph API["core-api — 契约层（零 Spring，仅 jackson + reactor-core + slf4j）"]
+        CONTRACT["AiModel 类型树<br/>SPI 契约<br/>record 值对象"]
+    end
+
+    subgraph CORE["core 实现模块（纯 Java）"]
+        MODEL["core-model<br/>四协议适配器 + Mapper + Codec"]
+        AGENT["core-agent<br/>AgentLoop / ChatTurnExecutor / Assembler<br/>权限 / 压缩"]
+        TOOL["core-tool<br/>7 个内置工具"]
+    end
+
+    subgraph IMPL["core-implementation（纯 Java 默认实现）"]
+        DEFAULT["CachingModelRegistry<br/>SnapshotProviderRegistry / DefaultModelFactory<br/>内存 Store / 装饰器链"]
+    end
+
+    subgraph SPRING["Spring 层（可被插件覆盖）"]
+        DOMAIN["open-coding-domain<br/>DB 版 SPI + Flyway + 实体"]
+        BOOT["open-coding-bootstrap<br/>AutoConfiguration / reload 触发"]
+    end
+
+    CONTRACT --> ENUM
+    MODEL --> CONTRACT
+    AGENT --> CONTRACT
+    TOOL --> CONTRACT
+    DEFAULT --> CONTRACT
+    DOMAIN --> CONTRACT
+    BOOT --> DOMAIN
+    BOOT --> DEFAULT
+    BOOT --> MODEL
+    BOOT --> AGENT
+    BOOT --> TOOL
+
+    RULES["依赖铁律<br/>1. core-* 永不依赖 Spring / domain / infrastructure<br/>2. 模型实例不依赖会话（上层 → 模型层单向）<br/>3. 读路径唯一：ChatRequestAssembler 只读 ChatSession.messages()<br/>4. 写路径唯一：ChatSession.append() → ConversationStore"]
+
+    MODEL -.-> RULES

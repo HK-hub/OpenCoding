@@ -94,9 +94,17 @@ springdoc:
     display-request-duration: true
 
 # ===================== Anthropic SDK =====================
-anthropic:
-  api-key: ${ANTHROPIC_API_KEY:}
-  base-url: ${ANTHROPIC_BASE_URL:https://api.anthropic.com}
+open-coding:
+  ai:
+    providers:
+      anthropic:
+        api-key: ${ANTHROPIC_API_KEY:}
+        base-url: ${ANTHROPIC_BASE_URL:https://api.anthropic.com}
+        model: ${ANTHROPIC_MODEL:claude-opus-5}
+      openai:
+        api-key: ${OPENAI_API_KEY:}
+        base-url: ${OPENAI_BASE_URL:https://api.openai.com}
+        model: ${OPENAI_MODEL:gpt-3.5-turbo}
 
 # ===================== Logging =====================
 logging:

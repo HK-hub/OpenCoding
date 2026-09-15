@@ -1,0 +1,47 @@
+sequenceDiagram
+    autonumber
+    participant CS as ChatService or AgentLoop
+    participant SESS as ChatSession
+    participant EXE as ChatTurnExecutor
+    participant ASM as ChatRequestAssembler
+    participant REG as ModelRegistry
+    participant DEC as 装饰器链
+    participant ADP as AnthropicChatModel
+    participant OBS as UsageRecorder or Observer
+
+    CS->>SESS: append(UserMessage) 唯一写入口
+    CS->>SESS: acquireRun(QUEUE) 单飞守卫
+    SESS-->>CS: RunHandle
+
+    CS->>EXE: executeStream(session, turn)
+    activate EXE
+    EXE->>ASM: assemble(session, turn, descriptor)
+    ASM->>SESS: messages() 只读 canonical 历史
+    SESS-->>ASM: 消息列表
+    Note over ASM: 三级 option 合并<br/>providerOptions 深合并<br/>systemPrompt 组装
+    ASM-->>EXE: ChatRequest
+
+    EXE->>REG: resolve(providerKey, modelId)
+    REG->>REG: 缓存命中判断
+    REG-->>EXE: AiModel 装饰链最外层
+
+    EXE->>DEC: stream(request)
+    DEC->>DEC: CapabilityGuard 校验声明 vs 请求
+    DEC->>ADP: stream(request)
+    ADP->>ADP: RequestMapper + OptionsCodec
+    ADP-->>DEC: 事件流
+    DEC-->>EXE: 事件流（重试只包住本次调用）
+
+    loop 流式增量，不落库
+        ADP-->>CS: TextDelta / ReasoningDelta / ToolCallDelta
+    end
+
+    ADP-->>EXE: StreamCompleted 携带完整 parts / toolCalls / usage
+    deactivate EXE
+    EXE-->>CS: StreamCompleted
+
+    CS->>SESS: append(AssistantMessage) 事务落库
+    CS->>OBS: onCall(request, response, durationMs)
+    CS->>SESS: handle.close() 释放单飞守卫
+
+    Note over CS,SESS: 若 finishReason = TOOL_CALLS 则进入工具体

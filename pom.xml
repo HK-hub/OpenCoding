@@ -20,6 +20,7 @@
         <module>open-coding-infrastructure</module>
         <module>open-coding-application</module>
         <module>open-coding-interfaces</module>
+        <module>open-coding-plugin</module>
     </modules>
 
     <!-- =========================================================== -->
@@ -34,7 +35,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <!-- Spring Boot -->
-        <spring-boot.version>3.4.1</spring-boot.version>
+        <spring-boot.version>3.5.16</spring-boot.version>
 
         <!-- Redisson -->
         <redisson.version>3.36.0</redisson.version>

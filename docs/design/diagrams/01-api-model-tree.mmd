@@ -1,0 +1,108 @@
+classDiagram
+    class AiModel {
+        <<interface>>
+        +String providerKey()
+        +String modelId()
+        +ModelDescriptor descriptor()
+        +Set capabilities()
+        +boolean supports(ModelCapability capability)
+        +Optional unwrap(Class sdkType)
+    }
+
+    class ChatModel {
+        <<interface>>
+        +ChatResponse chat(ChatRequest request)
+    }
+    class StreamingChatModel {
+        <<interface>>
+        +Flux stream(ChatRequest request)
+    }
+    class EmbeddingModel {
+        <<interface>>
+        +EmbeddingResponse embed(EmbeddingRequest request)
+    }
+    class ImageModel {
+        <<interface>>
+        +ImageResponse generate(ImageRequest request)
+    }
+    class VideoModel {
+        <<interface>>
+        +VideoTask submit(VideoRequest request)
+        +VideoTask poll(String taskId)
+    }
+    class SpeechToTextModel {
+        <<interface>>
+        +TranscriptResponse transcribe(SpeechToTextRequest request)
+    }
+    class TextToSpeechModel {
+        <<interface>>
+        +AudioResponse synthesize(TextToSpeechRequest request)
+    }
+
+    AiModel <|-- ChatModel
+    ChatModel <|-- StreamingChatModel
+    AiModel <|-- EmbeddingModel
+    AiModel <|-- ImageModel
+    AiModel <|-- VideoModel
+    AiModel <|-- SpeechToTextModel
+    AiModel <|-- TextToSpeechModel
+
+    class AiRequest {
+        <<interface>>
+        +String sessionId()
+        +String runId()
+        +ObjectNode extraParams()
+    }
+    class AiResponse {
+        <<interface>>
+        +String providerKey()
+        +String modelId()
+        +Usage usage()
+        +long latencyMs()
+        +ObjectNode rawProviderPayload()
+    }
+    class AiStreamEvent {
+        <<interface>>
+        +String messageId()
+        +long seq()
+    }
+
+    class ChatRequest {
+        <<record>>
+        +List messages
+        +List tools
+        +String systemPrompt
+        +ChatOptions options
+    }
+    class ChatResponse {
+        <<record>>
+        +List parts
+        +List toolCalls
+        +FinishReason finishReason
+        +String nativeStateToken
+    }
+    class ChatStreamEvent {
+        <<sealed>>
+    }
+    class StreamCompleted {
+        <<record>>
+        +List parts
+        +List toolCalls
+        +Usage usage
+        +FinishReason finishReason
+    }
+
+    AiRequest <|.. ChatRequest
+    AiResponse <|.. ChatResponse
+    AiStreamEvent <|-- ChatStreamEvent
+    ChatStreamEvent <|-- StreamCompleted
+
+    ChatModel ..> ChatRequest : 消费
+    ChatModel ..> ChatResponse : 产出
+    StreamingChatModel ..> ChatStreamEvent : 产出
+    ChatRequest ..> ChatOptions : canonical 强类型
+    ChatOptions ..> ObjectNode : providerOptions 厂商透传
+
+    note for StreamingChatModel "非流式由流式聚合兜底：AbstractChatModel.chat() = collect(stream())。M6"
+    note for ChatStreamEvent "7 个实现：StreamStarted / TextDelta / ReasoningDelta / ToolCallDelta / UsageReported / StreamCompleted / StreamFailed。M12"
+    note for AiModel "逃生舱 unwrap 在装饰器链下必须转发，否则插件拿不到原生 SDK client。M17"

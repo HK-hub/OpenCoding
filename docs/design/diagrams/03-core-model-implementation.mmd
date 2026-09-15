@@ -1,0 +1,75 @@
+classDiagram
+    class AbstractAiModel {
+        <<abstract>>
+        #ModelProvider provider
+        #ModelDescriptor descriptor
+        +String providerKey()
+        +ModelDescriptor descriptor()
+        +Optional unwrap(Class sdkType)
+    }
+    class AbstractChatModel {
+        <<abstract>>
+        #void require(ModelCapability capability)
+        #ChatResponse collect(Flux stream)
+        +ChatResponse chat(ChatRequest request)
+    }
+    class AbstractEmbeddingModel {
+        <<abstract>>
+    }
+    class AbstractImageModel {
+        <<abstract>>
+    }
+    class AbstractVideoModel {
+        <<abstract>>
+    }
+
+    class AnthropicChatModel {
+        +Flux stream(ChatRequest request)
+        +Optional unwrap(Class sdkType)
+    }
+    class OpenAIChatModel {
+        +Flux stream(ChatRequest request)
+    }
+    class GeminiChatModel {
+        +Flux stream(ChatRequest request)
+    }
+    class OllamaChatModel {
+        +Flux stream(ChatRequest request)
+    }
+
+    class AnthropicRequestMapper {
+        +List toSdk(List messages)
+    }
+    class AnthropicResponseMapper {
+        +Object toCanonical(Object sdkMessage)
+    }
+    class AnthropicStreamMapper {
+        -ToolCallAccumulator accumulator
+        +Flux map(Object sdkStream)
+    }
+    class AnthropicOptionsCodec {
+        +Object read(ObjectNode providerOptions)
+    }
+    class ToolCallAccumulator {
+        +void append(int index, String fragment)
+        +List build()
+    }
+
+    AbstractAiModel <|-- AbstractChatModel
+    AbstractChatModel <|-- AnthropicChatModel
+    AbstractChatModel <|-- OpenAIChatModel
+    AbstractChatModel <|-- GeminiChatModel
+    AbstractChatModel <|-- OllamaChatModel
+    AbstractAiModel <|-- AbstractEmbeddingModel
+    AbstractAiModel <|-- AbstractImageModel
+    AbstractAiModel <|-- AbstractVideoModel
+
+    AnthropicChatModel *-- AnthropicRequestMapper
+    AnthropicChatModel *-- AnthropicResponseMapper
+    AnthropicChatModel *-- AnthropicStreamMapper
+    AnthropicChatModel *-- AnthropicOptionsCodec
+    AnthropicStreamMapper *-- ToolCallAccumulator
+
+    note for AbstractChatModel "Template Method：chat() 骨架 = require() + collect(stream())，子类只实现 stream()。M6/M7"
+    note for AnthropicChatModel "仅编排约 40 行；协议差异全部下沉到 Mapper/Codec。新增第 5 个协议 = 加 5 个小类，基类零改动"
+    note for AnthropicStreamMapper "Accumulator 在适配器内，StreamCompleted 必定携带完整 parts/toolCalls/usage。M12"

@@ -5,7 +5,6 @@ import com.hk.opencoding.bootstrap.lunch.OpenCodingLuncher;
 import com.hk.opencoding.common.context.DefaultOpenCodingContext;
 import com.hk.opencoding.common.context.OpenCodingContext;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

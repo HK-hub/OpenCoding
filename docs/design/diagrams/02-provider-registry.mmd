@@ -1,0 +1,88 @@
+classDiagram
+    class ModelRegistry {
+        <<interface>>
+        +List providers()
+        +Optional findProvider(String providerKey)
+        +Optional findModel(String providerKey, String modelId)
+        +List listModels()
+        +AiModel resolve(String providerKey, String modelId)
+        +void invalidate()
+    }
+    class CachingModelRegistry {
+        -Map clients
+        -Map models
+        +AiModel resolve(String providerKey, String modelId)
+        +void reload()
+    }
+    class ModelProviderRegistry {
+        <<interface>>
+        +List providers()
+        +Optional find(String providerKey)
+        +void reload()
+        +void upsert(ModelProvider provider)
+        +void remove(String providerKey)
+    }
+    class SnapshotProviderRegistry {
+        -List yamlProviders
+        -List dbProviders
+        +void reload()
+    }
+    class ModelFactory {
+        <<interface>>
+        +AiModel create(ModelProvider provider, ModelDescriptor descriptor)
+    }
+    class DefaultModelFactory {
+        +AiModel create(ModelProvider provider, ModelDescriptor descriptor)
+    }
+    class ModelDecorator {
+        <<interface>>
+        +int order()
+        +boolean supports(ModelDescriptor descriptor)
+        +AiModel decorate(AiModel inner, ModelDescriptor descriptor)
+    }
+    class CapabilityGuard {
+        +int order()
+    }
+    class RetryingChatModel {
+        +int order()
+    }
+    class ModelProvider {
+        <<interface>>
+        +String providerKey()
+        +ProtocolType protocol()
+        +String baseUrl()
+        +String apiKey()
+        +List models()
+    }
+    class ModelDescriptor {
+        <<record>>
+        +String modelId
+        +Set capabilities
+        +Integer contextWindow
+        +BigDecimal inputPrice
+        +BigDecimal outputPrice
+    }
+    class ConfigurationSource {
+        <<enumeration>>
+        YAML
+        DATABASE
+    }
+
+    ModelRegistry <|.. CachingModelRegistry
+    ModelProviderRegistry <|.. SnapshotProviderRegistry
+    ModelFactory <|.. DefaultModelFactory
+    ModelDecorator <|.. CapabilityGuard
+    ModelDecorator <|.. RetryingChatModel
+
+    CachingModelRegistry --> ModelProviderRegistry : 元数据快照
+    CachingModelRegistry --> ModelFactory : 造实例
+    CachingModelRegistry --> ModelDescriptor : 缓存 key
+    ModelFactory ..> ModelDecorator : 组装装饰链
+    ModelProvider "1" --> "*" ModelDescriptor : models()
+    ModelProvider ..> ConfigurationSource : source 派生
+    ModelDecorator ..> ModelDescriptor : supports 过滤
+
+    note for ModelRegistry "上层唯一入口（Facade）。ModelResolver 已删除。M3"
+    note for ModelDescriptor "纯元数据，可落库可序列化；不含 client、不含 AiModel"
+    note for ModelProvider "纯配置实体，不持有运行时实例。M2"
+    note for CachingModelRegistry "reload() 两表全量失效；在途 run 持旧实例跑完。M5"

@@ -1,0 +1,61 @@
+classDiagram
+    class ChatService {
+        <<application>>
+        +void chat(String sessionId)
+    }
+    class AgentLoop {
+        <<interface>>
+        +AgentResult run(AgentTask task)
+        +Flux runStream(AgentTask task)
+    }
+    class DefaultAgentLoop {
+        +Flux runStream(AgentTask task)
+    }
+    class ChatTurnExecutor {
+        <<interface>>
+        +ChatResponse execute(ChatSession session, ChatTurnRequest turn)
+        +Flux executeStream(ChatSession session, ChatTurnRequest turn)
+    }
+    class ChatRequestAssembler {
+        <<interface>>
+        +ChatRequest assemble(ChatSession session, ChatTurnRequest turn, ModelDescriptor descriptor)
+    }
+    class ChatSession {
+        <<interface>>
+        +List messages()
+        +void append(Message message)
+        +void switchModel(String providerKey, String modelId)
+        +RunHandle acquireRun(QueuePolicy policy)
+        +ChatSession fork(int atSeq, String newTitle)
+    }
+    class ConversationStore {
+        <<interface>>
+        +Message appendMessage(String sessionId, Message message)
+        +List loadMessages(String sessionId, int fromSeq, int toSeq)
+    }
+    class InMemoryConversationStore {
+        <<core-implementation>>
+    }
+    class DbConversationStore {
+        <<domain>>
+    }
+    class ModelRegistry {
+        <<interface>>
+        +AiModel resolve(String providerKey, String modelId)
+    }
+
+    ChatService --> ChatTurnExecutor
+    AgentLoop <|.. DefaultAgentLoop
+    AgentLoop --> ChatTurnExecutor
+    ChatTurnExecutor --> ChatRequestAssembler
+    ChatTurnExecutor --> ModelRegistry
+    ChatRequestAssembler --> ChatSession : 只读 messages()
+    ChatService --> ChatSession : append()
+    AgentLoop --> ChatSession : append()
+    ChatSession --> ConversationStore : 唯一写路径
+    ConversationStore <|.. InMemoryConversationStore
+    ConversationStore <|.. DbConversationStore
+
+    note for ChatSession "没有 send()/stream()：执行是 Executor 的事。M9"
+    note for ChatTurnExecutor "无副作用：不落库、不改 session；落库由调用方 append。M9"
+    note for ChatRequestAssembler "只读 Session 内存 canonical（唯一事实源）。M8"

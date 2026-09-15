@@ -1,0 +1,23 @@
+flowchart LR
+    CALL["调用方<br/>ChatTurnExecutor"]
+    PLUGIN["插件装饰器<br/>QuotaGuard / Metering / Trace / Compliance<br/>order 200 及以上"]
+    RETRY["RetryingChatModel<br/>order = 100<br/>仅 retryable=true<br/>1s → 2s → 4s → 8s 带抖动"]
+    GUARD["CapabilityGuard<br/>order = 0（最内）<br/>声明 vs 请求校验"]
+    ADAPTER["AnthropicChatModel<br/>纯协议映射，无重试无校验"]
+    REJECT["抛出 AiException<br/>UNSUPPORTED_CAPABILITY<br/>未发出请求，不烧 token"]
+    FAIL["抛出原始 AiException<br/>重试耗尽"]
+
+    CALL --> PLUGIN
+    PLUGIN --> RETRY
+    RETRY --> GUARD
+    GUARD --> ADAPTER
+
+    GUARD -. "不支持且请求需要" .-> REJECT
+    RETRY -. "重试次数耗尽" .-> FAIL
+
+    UNWRAP["unwrap(Class) 逃生舱<br/>所有装饰器必须转发给 inner"]
+    ADAPTER -.-> UNWRAP
+    UNWRAP -.-> CALL
+
+    NOTE["重试边界 = 单次模型调用<br/>工具执行在装饰链之外<br/>因此工具绝不会被重复执行"]
+    RETRY -.-> NOTE

@@ -1,0 +1,29 @@
+stateDiagram-v2
+    [*] --> Idle : 会话创建
+    Idle --> Running : 用户消息 + acquireRun()
+
+    note right of Running
+        单飞不变量：同一 session 同时只有一个 run
+        保证 seq 严格单调、assistant 与 tool 消息不交错
+        这是 fork(atSeq) 与 100% 还原现场的前提
+    end note
+
+    Running --> Running : StreamCompleted → append → 工具 → 下一 step
+    Running --> AwaitApproval : PermissionPolicy = REQUIRE_APPROVAL
+    AwaitApproval --> Running : APPROVE → 执行工具
+    AwaitApproval --> Running : REJECT → ToolMessage(error)
+    Running --> Idle : finishReason != TOOL_CALLS
+    Running --> Aborted : abort() 或 CANCEL 策略
+    Aborted --> Running : 新消息 + acquireRun()
+
+    state "新消息到达时的策略" as Policy {
+        [*] --> QUEUE
+        QUEUE : 入队，当前 run 结束后自动开始（默认）
+        REJECT : 抛 CONFLICT，前端提示正在执行
+        CANCEL : 打断当前 run，用新消息重启
+    }
+
+    Idle --> Policy : 已有活跃 run
+    Policy --> Running : QUEUE 出队
+    Policy --> Idle : REJECT 拒绝
+    Policy --> Aborted : CANCEL 打断

@@ -11,8 +11,27 @@
     </parent>
 
     <artifactId>open-coding-core</artifactId>
+    <packaging>pom</packaging>
     <name>open-coding-core</name>
     <description>Core application module</description>
+
+    <modules>
+        <module>open-coding-core-api</module>
+        <module>open-coding-core-model</module>
+        <module>open-coding-core-agent</module>
+        <module>open-coding-core-tool</module>
+        <module>open-coding-core-implementation</module>
+    </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.hk.opencoding</groupId>
+                <artifactId>open-coding-core-api</artifactId>
+                <version>${opencoding.project.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>
