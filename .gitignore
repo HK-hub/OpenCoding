@@ -49,3 +49,6 @@ dist/
 .env
 .env.*
 !.env.example
+
+### Phase B research cache (shallow clones of competitor repos)
+.research-cache/
