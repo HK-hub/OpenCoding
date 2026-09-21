@@ -1,0 +1,25 @@
+flowchart TB
+    subgraph ASSEMBLE["handler 装配（注册期一次）"]
+        A1["通道 A · 注解方法式<br/>AnnotatedToolFactory 生成 handler<br/>（同源 BindingPlan → 反射调用）"]
+        A2["通道 B · 工具类式<br/>手写 execute 即 handler 本体"]
+        A3["通道 C · 显式注册式<br/>ToolHandlers.bind / 手写 lambda"]
+    end
+
+    subgraph CONTRACT["运行时契约"]
+        T["Tool（definition + handler）"]
+        TCK["ToolCall（argumentsJson → ToolParameter）"]
+    end
+
+    subgraph LOOP["core-agent · AgentLoop 单次工具调用链"]
+        R["① 路由 Registry.find"]
+        V["② 校验 ToolArgumentsValidator"]
+        P["③ 权限决策 / 审批"]
+        X["④ Tool.execute → handler"]
+        W["⑤ ToolMessage 组装回填 + 落库 + 推 WS"]
+    end
+
+    A1 --> T
+    A2 --> T
+    A3 --> T
+    T --> R --> V --> P --> X --> W
+    TCK --> V

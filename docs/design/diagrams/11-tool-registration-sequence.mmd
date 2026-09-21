@@ -1,0 +1,25 @@
+sequenceDiagram
+    autonumber
+    participant REG as DefaultToolRegistry
+    participant PROV as ToolProvider（BUILTIN / PLUGIN）
+    participant FACT as AnnotatedToolFactory
+    participant CHK as ToolSchemaChecker
+
+    REG->>PROV: tools()
+    PROV-->>REG: 工具对象列表（注解 POJO / Tool 实例）
+    loop 每个工具对象
+        alt 注解方法式（通道 A）
+            REG->>FACT: scan(pojo)
+            FACT->>FACT: 反射 @Tool/@ToolParam<br/>生成定义 + 参数绑定计划
+            FACT-->>REG: Tool（definition + handler）
+        else 工具类式 / 显式（通道 B/C）
+            REG->>REG: 定义决议：override > 类级注解 > Fail-Fast
+        end
+        REG->>CHK: check(def.inputSchema)
+        alt 不符合 canonical 子集
+            CHK--xREG: 抛注册异常（启动失败，错误信息含来源）
+        else 通过
+            REG->>REG: 深拷贝冻结 + name/alias 索引
+        end
+    end
+    REG-->>REG: definitions() 就绪（每 step 复用）

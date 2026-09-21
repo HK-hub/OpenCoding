@@ -1,0 +1,23 @@
+flowchart TB
+    START["argumentsJson"] --> SIZE{"长度 ≤ 256KB？"}
+    SIZE -->|"否"| V1["Violation: MALFORMED_JSON<br/>（超大小上限）"]
+    SIZE -->|"是"| PARSE{"Jackson readTree 可解析？"}
+    PARSE -->|"否"| V2["Violation: MALFORMED_JSON"]
+    PARSE -->|"是"| ROOT{"根是 object？"}
+    ROOT -->|"否"| V3["Violation: ROOT_NOT_OBJECT"]
+    ROOT -->|"是"| WALK["walkObject（schema 驱动）"]
+
+    subgraph WALKBOX["walkObject / walkValue（递归，短路单条不短路整体）"]
+        W1["required 缺失 → MISSING_REQUIRED"]
+        W2["未声明 key → UNKNOWN_FIELD（列出可用字段）"]
+        W3["null 值：必填→MISSING_REQUIRED；可选→视为缺席跳过"]
+        W4["type 严格比对（integer=无小数部分数值）"]
+        W5["enum 成员检查（string）"]
+        W6["format 可解析检查（date / date-time）"]
+        W7["object → 逐属性递归；array → 逐元素递归（path 带 [i]）"]
+    end
+
+    WALK --> WALKBOX --> COLLECT["收集全部违规（封顶 20 条 + 「另有 N 条」）"]
+    COLLECT --> OUT{"违规为空？"}
+    OUT -->|"是"| PASS["通过 → 进入权限决策 ③"]
+    OUT -->|"否"| FEED["summarize → ToolResult(false, INVALID_TOOL_ARGUMENTS)<br/>→ ToolMessage 回喂自纠"]

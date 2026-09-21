@@ -1,0 +1,36 @@
+sequenceDiagram
+    autonumber
+    participant M as core-model 适配
+    participant L as AgentLoop
+    participant R as ToolRegistry
+    participant V as ToolArgumentsValidator
+    participant P as 权限决策 / 审批
+    participant H as ToolHandler（业务方法）
+    participant S as 会话 / 落库
+
+    M->>L: StreamCompleted(toolCalls[])
+    L->>S: append(AssistantMessage 含 ToolCall)
+    loop 每个 toolCall（顺序执行）
+        L->>R: find(toolName)
+        alt 未找到
+            L->>S: 记 oc_tool_call(NOT_FOUND) + ToolMessage(error: TOOL_NOT_FOUND) 回喂
+        else 已找到
+            R-->>L: Tool
+            L->>L: 回填 riskLevel = definition().riskLevel（D43）
+            L->>V: validate(inputSchema, argumentsJson)
+            alt 校验失败（required/type/enum/format/未知字段）
+                L->>S: ToolResult(false, INVALID_TOOL_ARGUMENTS) → ToolMessage 回喂自纠
+            else 通过
+                L->>P: decide(riskLevel, argumentsJson)
+                alt DENY / 审批拒绝
+                    L->>S: 记 DENIED + ToolMessage(error) 回喂
+                else 放行
+                    P-->>L: 放行
+                    L->>H: execute(call, ctx) → handler.handle(...)
+                    H->>H: bindArgument → method.invoke → ToolResult
+                    H-->>L: ToolResult（业务结果，无 toolCallId）
+                    L->>S: 回填 toolCallId/durationMs → 落库 ToolMessage + 推 WS
+                end
+            end
+        end
+    end

@@ -1,0 +1,27 @@
+flowchart TB
+    subgraph INPUT["输入面"]
+        A1["通道 A · @Tool 方法签名"]
+        A2["通道 B · 类级 @Tool + @ToolParam"]
+        A3["通道 C · ToolSchemas Builder"]
+    end
+
+    subgraph ENGINE["ToolSchemaGenerator（生成引擎）"]
+        P1["collectParams<br/>名称 / 描述 / required / format / enumValues"]
+        P2["toSchema<br/>递归类型映射表"]
+        P3["assembleRoot<br/>properties 声明序 + required + additionalProperties:false"]
+    end
+
+    subgraph GUARD["ToolSchemaChecker（唯一自检点）"]
+        G1["canonical 白名单 + 结构上限<br/>深度 ≤ 5 / 属性总数 ≤ 50"]
+    end
+
+    subgraph OUT["产物（冻结）"]
+        O1["ToolDefinition.inputSchema"]
+        O2["BindingPlan（name → position/type/converter）"]
+    end
+
+    A1 --> P1
+    A2 --> P1
+    A1 -.->|"同一次扫描"| O2
+    P1 --> P2 --> P3 --> G1 --> O1
+    A3 --> G1

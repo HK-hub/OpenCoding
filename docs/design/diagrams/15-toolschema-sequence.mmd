@@ -1,0 +1,17 @@
+sequenceDiagram
+    autonumber
+    participant F as AnnotatedToolFactory / Registry
+    participant G as ToolSchemaGenerator
+    participant C as ToolSchemaChecker
+
+    F->>G: definitionFromMethod(method)
+    G->>G: ① collectParams——名称解析 + 描述 + required 推断 + format/enumValues 校验
+    alt 名称不可得 / INFER 未解析 / 类型不支持 / 超上限
+        G--xG: Fail-Fast（启动失败，错误信息含「类#方法（参数）」）
+    end
+    G->>G: ② toSchema——递归类型映射（标量 / enum / record / List 递归 / 时间类型）
+    G->>G: ③ assembleRoot——properties（声明序）+ required 数组 + additionalProperties:false
+    G-->>F: ToolDefinition（含 inputSchema）+ BindingPlan
+    F->>C: check(inputSchema)
+    C-->>F: 通过（否则启动失败）
+    Note over F: 深拷贝冻结 → DefaultToolRegistry 索引缓存

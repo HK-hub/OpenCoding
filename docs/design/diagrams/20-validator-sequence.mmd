@@ -1,0 +1,16 @@
+sequenceDiagram
+    autonumber
+    participant MOD as 模型
+    participant L as AgentLoop
+    participant V as ToolArgumentsValidator
+    participant S as 会话 / 落库
+
+    MOD->>L: ToolCall#1（arguments 含 "limit": "200"）
+    L->>V: validate(schema, arguments)
+    V-->>L: [TYPE_MISMATCH(limit)]
+    L->>S: ToolMessage(error, INVALID_TOOL_ARGUMENTS) 回喂
+    MOD->>L: ToolCall#2（自纠后："limit": 200）
+    L->>V: validate(schema, arguments)
+    V-->>L: []（通过）
+    L->>S: 进入权限 ③ → 执行 ④
+    Note over L: 失败计数 (sessionId, toolName)：成功清零；<br/>连续 3 次失败 → ERROR 日志 + oc_agent_event

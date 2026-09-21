@@ -1,0 +1,46 @@
+classDiagram
+    class ToolHandler {
+        <<functional interface>>
+        +handle(ToolParameter parameters, ToolExecutionContext context) ToolResult
+    }
+    class Tool {
+        <<interface>>
+        +getToolDefinition() ToolDefinition
+        +execute(ToolCall call, ToolExecutionContext context) ToolResult
+        +of(ToolDefinition, ToolHandler)$ Tool
+    }
+    class ToolHandlers {
+        <<final>>
+        +bind(Function fn, Class argsType)$ ToolHandler
+    }
+    class AnnotatedToolFactory {
+        <<final>>
+        +scan(Object toolObject)$ List~Tool~
+        -handlerFrom(Object target, Method method, BindingPlan plan)$ ToolHandler
+        -bindArgument(ToolParameter params, ParamBinding binding)$ Object
+    }
+    class BindingPlan {
+        <<record>>
+        +List~ParamBinding~ bindings
+    }
+    class ToolParameter {
+        <<interface>>
+        +getString(String) Optional~String~
+        +getInteger(String) Optional~Integer~
+        +getJsonNode() JsonNode
+    }
+    class ToolResult {
+        <<record>>
+        +String toolCallId
+        +boolean success
+        +List~ContentPart~ modelParts
+        +ObjectNode displayPayload
+        +String errorCode
+    }
+
+    AnnotatedToolFactory ..> ToolHandler : 生成（通道 A）
+    AnnotatedToolFactory ..> BindingPlan : 消费（同源扫描）
+    Tool *-- ToolHandler : 委托执行（of 工厂）
+    ToolHandlers ..> ToolHandler : 生成（单 record）
+    ToolHandler ..> ToolParameter : 读取参数
+    ToolHandler ..> ToolResult : 返回

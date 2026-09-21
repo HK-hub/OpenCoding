@@ -1,0 +1,36 @@
+flowchart TB
+    subgraph CHANNELS["书写面 · 三条注册通道"]
+        A["通道 A · 注解方法式<br/>POJO + @Tool 方法 + @ToolParam 参数<br/>（内置工具 / 插件默认）"]
+        B["通道 B · 工具类式<br/>implements Tool（execute 手写）<br/>定义：override 或类级注解"]
+        C["通道 C · 显式注册式<br/>Tool.of(definition, ToolHandler)"]
+    end
+
+    subgraph AUTHORING["authoring toolkit（core-api · 纯 Java）"]
+        FACTORY["AnnotatedToolFactory.scan<br/>注解 → 定义 + 绑定计划"]
+        SCHEMAS["ToolSchemas Builder<br/>纯 Jackson 构建 canonical schema"]
+    end
+
+    subgraph PIPELINE["注册流水线（core-implementation）"]
+        RESOLVE["定义决议<br/>override > 注解 > Fail-Fast"]
+        CHECK["ToolSchemaChecker<br/>canonical 子集自检"]
+        FREEZE["深拷贝冻结 + name/alias 索引<br/>（同名冲突 Fail-Fast）"]
+        REG["DefaultToolRegistry"]
+    end
+
+    subgraph RUNTIME["运行时消费"]
+        ADP["core-model 适配器<br/>Anthropic/OpenAI/Ollama 直传 · Gemini 降级"]
+        LOOP["core-agent AgentLoop<br/>路由 → 校验 → 权限 → 执行"]
+        H["ToolHandler<br/>raw 参数 → 具体方法调用"]
+    end
+
+    A --> FACTORY
+    B --> RESOLVE
+    C --> SCHEMAS
+    SCHEMAS --> RESOLVE
+    FACTORY --> RESOLVE
+    RESOLVE --> CHECK
+    CHECK --> FREEZE
+    FREEZE --> REG
+    REG -->|"definitions() 随 ChatRequest 下发"| ADP
+    ADP -->|"模型返回 ToolCall(argumentsJson)"| LOOP
+    LOOP -->|"execute(call, ctx)"| H

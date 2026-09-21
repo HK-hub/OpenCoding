@@ -1,0 +1,148 @@
+classDiagram
+    direction TB
+
+    class Tool {
+        <<interface>>
+        +getToolDefinition() ToolDefinition
+        +execute(ToolCall call, ToolExecutionContext context) ToolResult
+        +of(ToolDefinition definition, ToolHandler handler)$ Tool
+    }
+    class ToolHandler {
+        <<functional interface>>
+        +handle(ToolParameter parameters, ToolExecutionContext context) ToolResult
+    }
+    class ToolDefinition {
+        +String name
+        +List~String~ aliasNames
+        +String description
+        +ObjectNode inputSchema
+        +ToolRiskLevel riskLevel
+        +UNSPECIFIED$ ToolDefinition
+    }
+    class ToolParameter {
+        <<interface>>
+        +getRawJson() String
+        +getJsonNode() JsonNode
+        +getString(String key) Optional~String~
+        +getInteger(String key) Optional~Integer~
+        +as(Class~T~ type) T
+        +containsKey(String key) boolean
+    }
+    class ToolResult {
+        <<record>>
+        +String toolCallId
+        +boolean success
+        +List~ContentPart~ modelParts
+        +ObjectNode displayPayload
+        +String errorCode
+    }
+    class ToolRiskLevel {
+        <<enum>>
+        READ_ONLY
+        WRITE_LOCAL
+        EXECUTE
+        NETWORK
+        DESTRUCTIVE
+    }
+    class ToolProvider {
+        <<interface>>
+        +sourceId() String
+        +tools() List~Tool~
+        +order() int
+    }
+    class ToolRegistry {
+        <<interface>>
+        +register(Tool... tools) void
+        +find(String name) Optional~Tool~
+        +definitions() List~ToolDefinition~
+    }
+    class ToolAnnotation {
+        <<annotation @Tool>>
+        +String name
+        +String description
+        +ToolRiskLevel riskLevel
+        +String[] aliasNames
+    }
+    class ToolParamAnnotation {
+        <<annotation @ToolParam>>
+        +String name
+        +ToolParamType type
+        +ToolParamType items
+        +String format
+        +boolean required
+        +String description
+    }
+    class ToolParamType {
+        <<enum>>
+        STRING
+        INTEGER
+        NUMBER
+        BOOLEAN
+        ARRAY
+        INFER
+    }
+    class JsonNode {
+        <<Jackson>>
+    }
+    class ObjectNode {
+        <<Jackson>>
+    }
+    class ToolSchemas {
+        <<authoring>>
+        +object()$ ObjectBuilder
+    }
+    class ToolSchemaChecker {
+        <<authoring>>
+        +check(ObjectNode schema)$ void
+    }
+    class AnnotatedToolFactory {
+        <<authoring>>
+        +scan(Object toolObject)$ List~Tool~
+    }
+    class ToolHandlers {
+        <<authoring>>
+        +bind(Function fn, Class argsType)$ ToolHandler
+    }
+    class DefaultToolRegistry {
+        <<core-implementation>>
+        -Map~String, Tool~ index
+        -List~ToolDefinition~ frozenDefs
+    }
+    class AgentLoop {
+        <<core-agent>>
+    }
+    class ToolArgumentsValidator {
+        <<core-agent>>
+        +validate(ObjectNode schema, String argumentsJson) List~Violation~
+    }
+    class GeminiToolSchemaMapper {
+        <<core-model>>
+        +map(ObjectNode canonical) Schema
+    }
+    class ReadFileTool {
+        <<core-tool · 通道 A 样例>>
+        +read(String path, String model, Integer beginLine) ToolResult
+    }
+
+    Tool ..> ToolHandler : 委托执行（A 生成 / B 手写 / C 直供）
+    Tool --> ToolDefinition : definition
+    ToolDefinition --> ObjectNode : inputSchema（唯一事实源）
+    ToolDefinition --> ToolRiskLevel
+    ToolParameter --> JsonNode : 解析自 argumentsJson
+    ToolRegistry <|.. DefaultToolRegistry
+    ToolProvider ..> Tool : 提供
+    DefaultToolRegistry o-- Tool : 聚合 + name/alias 索引
+    DefaultToolRegistry ..> ToolSchemaChecker : 注册期自检
+    DefaultToolRegistry ..> AnnotatedToolFactory : 定义决议兜底
+    AnnotatedToolFactory ..> ToolAnnotation : 读取
+    AnnotatedToolFactory ..> ToolParamAnnotation : 读取
+    AnnotatedToolFactory ..> Tool : 生成（通道 A）
+    ToolSchemas ..> ObjectNode : 构建（通道 C）
+    ToolHandlers ..> ToolHandler : 生成（单 record）
+    ToolParamAnnotation --> ToolParamType
+    ReadFileTool ..> ToolAnnotation : 标注（方法级）
+    ReadFileTool ..> ToolResult : 返回
+    AgentLoop --> ToolRegistry : find / definitions
+    AgentLoop --> ToolArgumentsValidator : 执行前校验
+    ToolArgumentsValidator ..> ObjectNode : 读 schema
+    GeminiToolSchemaMapper ..> ObjectNode : 降级读取

@@ -1,0 +1,60 @@
+classDiagram
+    class ToolSchemaGenerator {
+        <<final · engine>>
+        +definitionFromMethod(Method)$ ToolDefinition
+        +definitionFromType(Class)$ ToolDefinition
+        +schemaFromRecord(Class)$ ObjectNode
+        +bindingPlanFrom(Method)$ BindingPlan
+        -collectParams(Parameter[], int)$ List~ParamSpec~
+        -toSchema(Class, Type, ParamSpec, int)$ ObjectNode
+        -assembleRoot(List~ParamSpec~)$ ObjectNode
+    }
+    class ParamSpec {
+        <<record>>
+        +String name
+        +String description
+        +boolean required
+        +String format
+        +ToolParamType declaredType
+        +ToolParamType declaredItems
+        +String[] enumValues
+        +Class rawType
+        +Type genericType
+    }
+    class BindingPlan {
+        <<record>>
+        +List~ParamBinding~ bindings
+    }
+    class ToolSchemas {
+        <<final · Builder（通道 C）>>
+        +object()$ ObjectBuilder
+    }
+    class ToolSchemaChecker {
+        <<final · 唯一自检点>>
+        +check(ObjectNode)$ void
+    }
+    class AnnotatedToolFactory {
+        <<final · 注解编排>>
+        +scan(Object)$ List~Tool~
+    }
+    class ToolHandlers {
+        <<final · record 绑定 helper>>
+        +bind(Function, Class)$ ToolHandler
+    }
+    class ToolDefinition {
+        <<record>>
+        +String name
+        +List~String~ aliasNames
+        +String description
+        +ObjectNode inputSchema
+        +ToolRiskLevel riskLevel
+    }
+
+    AnnotatedToolFactory ..> ToolSchemaGenerator : 委托生成（定义 + 绑定计划）
+    AnnotatedToolFactory ..> ToolHandlers : 生成 handler
+    ToolSchemaGenerator ..> ParamSpec : 中间态
+    ToolSchemaGenerator ..> BindingPlan : 产出
+    ToolSchemaGenerator ..> ToolDefinition : 组装
+    ToolSchemaGenerator ..> ToolSchemaChecker : 产物自检（经 Factory/Registry）
+    ToolSchemas ..> ToolSchemaChecker : 产物自检
+    ToolDefinition --> ObjectNode : inputSchema（唯一事实源）
