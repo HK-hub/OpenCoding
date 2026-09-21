@@ -1,8 +1,8 @@
 package com.hk.opencoding.core.api.request;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.hk.opencoding.core.llm.message.Message;
-import com.hk.opencoding.core.tools.ToolDefinition;
+import com.hk.opencoding.core.api.message.Message;
+import com.hk.opencoding.core.api.tool.ToolDefinition;
 
 import java.math.BigDecimal;
 import java.util.List;

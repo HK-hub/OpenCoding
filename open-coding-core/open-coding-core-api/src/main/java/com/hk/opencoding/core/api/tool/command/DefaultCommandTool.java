@@ -1,6 +1,10 @@
 package com.hk.opencoding.core.api.tool.command;
 
-import com.hk.opencoding.common.context.OpenCodingContext;
+import com.hk.opencoding.core.api.message.ToolCall;
+import com.hk.opencoding.core.api.state.OpenCodingContext;
+import com.hk.opencoding.core.api.tool.ToolDefinition;
+import com.hk.opencoding.core.api.tool.ToolExecutionContext;
+import com.hk.opencoding.core.api.tool.ToolResult;
 import jakarta.annotation.Resource;
 
 /**
@@ -24,4 +28,13 @@ public class DefaultCommandTool implements CommandTool {
     }
 
 
+    @Override
+    public ToolDefinition getToolDefinition() {
+        return null;
+    }
+
+    @Override
+    public ToolResult execute(ToolCall call, ToolExecutionContext context) {
+        return null;
+    }
 }

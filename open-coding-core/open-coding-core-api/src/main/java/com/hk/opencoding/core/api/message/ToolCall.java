@@ -1,5 +1,8 @@
 package com.hk.opencoding.core.api.message;
 
+import com.hk.opencoding.core.api.tool.ToolParameter;
+import com.hk.opencoding.common.enums.ToolRiskLevel;
+
 /**
  * @author HK意境
  * @version 1.0
@@ -11,8 +14,10 @@ public interface ToolCall {
     String getId();
 
     /** 工具函数名称 */
-    String getFunctionName();
+    String getToolName();
 
     /** 参数结构化对象 */
-    ToolParam getParameters();
+    ToolParameter getParameter();
+
+    ToolRiskLevel getRiskLevel();
 }

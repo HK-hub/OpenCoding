@@ -1,7 +1,6 @@
 package com.hk.opencoding.core.model.base;
 
-import com.hk.opencoding.core.llm.model.ChatModel;
-import com.hk.opencoding.core.llm.model.StreamingChatModel;
+import com.hk.opencoding.core.api.model.ChatModel;
 
 /**
  * @author HK意境

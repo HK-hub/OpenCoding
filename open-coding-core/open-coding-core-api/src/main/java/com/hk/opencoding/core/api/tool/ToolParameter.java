@@ -9,7 +9,7 @@ import java.util.Optional;
  * 工具调用参数，统一封装模型返回的 function_call arguments。
  * 底层是 JSON 对象，提供类型安全的访问方法。
  */
-public interface ToolParam {
+public interface ToolParameter {
 
     /**
      * 获取原始 JSON 字符串。
@@ -49,12 +49,12 @@ public interface ToolParam {
     /**
      * 按 key 获取嵌套对象（返回子 ToolParam）。
      */
-    Optional<ToolParam> getObject(String key);
+    Optional<ToolParameter> getObject(String key);
 
     /**
      * 按 key 获取数组，返回元素列表。
      */
-    List<ToolParam> getArray(String key);
+    List<ToolParameter> getArray(String key);
 
     /**
      * 将参数反序列化为指定类型的 POJO。

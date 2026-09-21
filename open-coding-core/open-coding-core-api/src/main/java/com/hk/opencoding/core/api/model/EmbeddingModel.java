@@ -1,11 +1,14 @@
 package com.hk.opencoding.core.api.model;
 
-import com.hk.opencoding.core.api.model.capable.EmbeddingCapable;
+import com.hk.opencoding.core.api.request.EmbeddingRequest;
+import com.hk.opencoding.core.api.response.EmbeddingResponse;
 
 /**
  * @author HK意境
  * @version 1.0
  * @since 2026/9/1 21:10
  */
-public interface EmbeddingModel extends AiModel, EmbeddingCapable {
+public interface EmbeddingModel extends AiModel {
+
+    EmbeddingResponse embed(EmbeddingRequest request);
 }

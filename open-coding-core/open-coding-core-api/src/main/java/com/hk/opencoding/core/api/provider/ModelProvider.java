@@ -44,12 +44,12 @@ public interface ModelProvider {
      */
     Map<String, String> getExtraBody();
 
-    Boolean getEnable();
-
     /**
      * 代理地址
      */
     String getProxy();
 
     List<AiModel> getModels();
+
+    Boolean getEnable();
 }
