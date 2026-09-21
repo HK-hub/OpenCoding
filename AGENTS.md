@@ -17,10 +17,10 @@ OpenCoding 是企业级多模态 Coding Agent（Server + headless CLI）。后�
 | --- | --- | --- |
 | `open-coding-common` | 纯枚举与工具类（零 Spring） | ❌ |
 | `open-coding-core-api` | 全部契约 + SPI（message/model/provider/agent/tool/permission/error/extension） | ❌ |
-| `open-coding-core-model` | 四协议 SDK 适配器、请求/响应映射、ModelFactory | ❌ |
+| `open-coding-core-model` | 四协议 SDK 适配器 + Mapper/Codec（厂商 SDK 依赖集中于此） | ❌ |
 | `open-coding-core-agent` | AgentLoop（ReAct）、压缩、权限决策链、审批编排、重试装饰 | ❌ |
 | `open-coding-core-tool` | 内置工具（nexec / pty4j） | ❌ |
-| `open-coding-core-implementation` | 纯 Java 默认实现（内存 store/registry）+ 插件装配 | ❌ |
+| `open-coding-core-implementation` | 纯 Java 默认实现（DefaultModelFactory / CachingModelRegistry / 装饰器链 / 内存 store）+ 插件装配 | ❌ |
 | `open-coding-domain` | `oc_*` 实体 + Mapper + Flyway + **DB 版 SPI 实现** | ✅ |
 | `open-coding-infrastructure` | Redis 缓存、文件系统、媒体存储、加密 | ✅ |
 | `open-coding-application` | 用例编排（Session/Project/Provider/AgentRunService） | ✅ |
