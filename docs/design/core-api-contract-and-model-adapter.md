@@ -24,7 +24,7 @@
 
 ## 2. 决策日志（D1–D36）
 
-> 模型抽象层的 19 项追加决策（M1–M19）见 `docs/design/model-abstraction-layer.md` §1，与本文 D1–D36 同等效力；两者冲突时以 M 系列为准（模型层）。
+> 模型抽象层的 22 项追加决策（M1–M22）见 `docs/design/model-abstraction-layer.md` §1，与本文 D1–D36 同等效力；两者冲突时以 M 系列为准（模型层）。
 
 | # | 决策 | 结论 |
 |---|---|---|
@@ -75,10 +75,10 @@
 |---|---|---|
 | `open-coding-common` | 纯枚举与工具类（OperationSystem、GitBashDetector、lifecycle 事件基类） | ❌ |
 | `open-coding-core-api` | **全部契约 + SPI**：message / content / model / provider / request / response / session / agent / tool / permission / error / extension | ❌ 仅 jackson + reactor-core + slf4j |
-| `open-coding-core-model` | 四协议 SDK 适配器、请求/响应映射器、ModelFactory、实例缓存 | ❌ |
+| `open-coding-core-model` | 四协议 SDK 适配器 + 三件套 Mapper/Codec（厂商 SDK 依赖集中于此，D8） | ❌ |
 | `open-coding-core-agent` | AgentLoop（ReAct）、上下文压缩、权限决策链、审批编排、重试装饰 | ❌ |
 | `open-coding-core-tool` | 内置工具（依赖 nexec / pty4j） | ❌ |
-| `open-coding-core-implementation` | 纯 Java 默认实现（内存 store、no-op recorder、内存 registry）+ ServiceLoader 插件装配 | ❌ |
+| `open-coding-core-implementation` | 纯 Java 默认实现（DefaultModelFactory / CachingModelRegistry / 装饰器链 / 内存 store、no-op recorder）+ ServiceLoader 插件装配 | ❌ |
 | `open-coding-domain` | `oc_*` 实体 + Mapper + Flyway + **DB 版 SPI 实现** | ✅ |
 | `open-coding-infrastructure` | 技术设施（Redis 缓存、文件系统、媒体存储、加密） | ✅ |
 | `open-coding-application` | 用例编排：SessionService / ProjectService / ProviderService / AgentRunService | ✅ |
@@ -157,7 +157,7 @@ flowchart BT
 
 ### 3.4 模型抽象层类图（Mermaid）
 
-> 决策编号 M1–M20 出自 `model-abstraction-layer.md`；本节是这些决策的图形化版本，源文件在 `docs/design/diagrams/*.mmd`（可用 `mmdc` 导出 PNG/SVG）。
+> 决策编号 M1–M22 出自 `model-abstraction-layer.md`；本节是这些决策的图形化版本，源文件在 `docs/design/diagrams/*.mmd`（可用 `mmdc` 导出 PNG/SVG）。
 
 **图1 · 契约层类型树（core-api）** —— `AiModel` 基座 + 7 个模态接口（唯一派生层 `StreamingChatModel`）+ 三个公共基座
 
@@ -526,7 +526,7 @@ classDiagram
 
 ## 5. core-api 全接口清单
 
-包结构：`com.hk.opencoding.core.api.{message, content, model, model.capable, provider, request, response, session, agent, tool, permission, error, extension, spi}`
+包结构：`com.hk.opencoding.core.api.{message, content, model, provider, request, response, session, agent, tool, permission, error, extension, spi}`
 
 ### 5.1 消息与内容
 
@@ -607,7 +607,7 @@ public final class Messages {
 ### 5.2–5.5 模型契约 / Provider / 请求响应 / 会话
 
 > ⚠ **本节已被 `docs/design/model-abstraction-layer.md` 全面取代**（该文件是模型抽象层的唯一权威依据）。
-> 重构要点（详设见该文件 §1 决策日志 M1–M19）：
+> 重构要点（详设见该文件 §1 决策日志 M1–M21）：
 >
 > - `AiModel` 类型树：删除 `model/capable/*`；`StreamingChatModel extends ChatModel`，非流式由流式聚合兜底（`AbstractChatModel.chat() = collect(stream())`）。
 > - 三层职责切分：`ModelDescriptor`（元数据 record）/ `ModelProvider`（配置实体，**不持有实例**）/ `AiModel`（运行时实例）。
@@ -617,6 +617,8 @@ public final class Messages {
 > - 装饰器链 `CapabilityGuard → RetryingChatModel → [插件] → 适配器`，重试边界 = 单次模型调用。
 > - 会话级单飞守卫 `ChatSession.acquireRun()`（`QUEUE`/`REJECT`/`CANCEL`）。
 > - 保留 `AiRequest` / `AiResponse` / `AiStreamEvent` 三个公共基座作为计量与审计的唯一接缝。
+> - 类型 ⇔ 能力声明一致性自检（M21）：装配期 WARN + 会话内 `oc_agent_event(MODEL_CAPABILITY_MISMATCH)`。
+> - 协议演进政策与 Responses 建模（M22：独立 `ProtocolType.OPENAI_RESPONSES` 枚举值）见详设 §12。
 
 ### 5.6 Agent
 
@@ -699,6 +701,8 @@ public record ApprovalOutcome(boolean approved, String decidedBy,
 
 ### 5.8 工具
 
+> ⚠ 本节契约已由 `docs/design/tool-system-design.md` 完整化并取代（D37–D44：注解书写面 / ToolHandler 接缝 / 注册流水线 / 校验回喂）；工具相关契约以该文档为准，本节仅保留历史锚点与四协议映射引用。
+
 ```java
 public record ToolDefinition(String name, String description,
                              List<ToolParam> params, ObjectNode inputSchema,
@@ -780,9 +784,9 @@ public record AgentEventRecord(String sessionId, String runId, long seq,
                                AgentEventType eventType, ObjectNode payload) {}
 
 public enum AgentEventType {
-    RUN_STARTED, MODEL_SWITCHED, PERMISSION_MODE_CHANGED, AGENT_MODE_CHANGED,
-    COMPACTION_PERFORMED, APPROVAL_REQUESTED, APPROVAL_DECIDED, TOOL_DENIED,
-    TOOL_EXECUTED, RUN_ABORTED, RUN_FAILED, RUN_COMPLETED,
+    RUN_STARTED, MODEL_SWITCHED, MODEL_CAPABILITY_MISMATCH, PERMISSION_MODE_CHANGED,
+    AGENT_MODE_CHANGED, COMPACTION_PERFORMED, APPROVAL_REQUESTED, APPROVAL_DECIDED,
+    TOOL_DENIED, TOOL_EXECUTED, RUN_ABORTED, RUN_FAILED, RUN_COMPLETED,
     SESSION_FORKED, SESSION_EXPORTED, SESSION_IMPORTED
 }
 
@@ -849,6 +853,7 @@ public record ImportOptions(boolean createNewProject, String targetProjectId, bo
 | ProtocolType | 实现类 | 客户端 | v1 |
 |---|---|---|---|
 | `OPENAI` | `OpenAIChatModel` | `com.openai:openai-java:4.63.1` | ✅ |
+| `OPENAI_RESPONSES` | `OpenAIResponsesChatModel`（同 SDK；native state 加速，M22） | `com.openai:openai-java:4.63.1` | v1.1 |
 | `OPENAI_COMPATIBLE` | 同 `OpenAIChatModel`（差异化 baseUrl / authHeader / extraBody） | 同上 | ✅ |
 | `ANTHROPIC` | `AnthropicChatModel` | `com.anthropic:anthropic-java:2.57.0` | ✅ |
 | `GEMINI` | `GeminiChatModel` | `com.google.genai:google-genai:1.71.0` | ✅ |
@@ -889,7 +894,7 @@ public record ImportOptions(boolean createNewProject, String targetProjectId, bo
 1. **工具调用流式累加**：`ToolCallDelta` 分片必须由适配器内的 `ToolCallAccumulator` 按 `index` 累加 `argumentsFragment`，`StreamCompleted` 才给出完整 `ToolCall`。
 2. **原生状态 + 全量重放的降级**：`nativeStateToken` 只用于 OpenAI Responses 加速；模型切换、token 失效、或协议不支持时**自动回落为全量重放 canonical 历史**（canonical 历史永远是事实源）。
 3. **能力校验前置**：`AbstractChatModel.chat/stream` 先做 `supports(...)` 校验，不支持则抛 `UNSUPPORTED_CAPABILITY`。
-4. **实例缓存**：`ModelInstanceCache` 按 `(providerKey, modelId)` 缓存模型实例（SDK client 复用连接池），provider 变更后 `reload()` 清缓存。
+4. **实例缓存**：`CachingModelRegistry` 持有两张缓存（`clients` 按 providerKey / `models` 按 providerKey+modelId），SDK client 复用连接池；provider 变更后 `reload()` 全量失效（M5）。
 
 ---
 
@@ -1538,7 +1543,7 @@ sequenceDiagram
 | **M3 core-tool 7 内置工具** | read/write/edit/list/grep/execute_command/fetch_url + `ToolRegistry` + 风险分级 + 输出截断落 media | 工具单测 + 在临时 workspace 端到端跑通 read→edit→grep |
 | **M4 core-agent** | AgentLoop（阻塞 + 流式）、`CompositePermissionPolicy`、`AgentModeProfile`、审批阻塞编排、压缩、`RetryingChatModel` | 假模型（stub ChatModel）驱动完整 ReAct 循环单测：工具往返、DENY、REQUIRE_APPROVAL→APPROVE/REJECT、压缩触发、重试、abort |
 | **M5 open-coding-domain** | Flyway `V1__core_schema.sql` + 12 张表实体/Mapper + DB 版 `ConversationStore`/`ProjectStore`/`UsageRecorder`/`MediaStore`/`AgentEventRecorder` | Testcontainers PostgreSQL：建表、消息 append、seq 唯一约束、fork 深拷贝、rollup 汇总 |
-| **M6 application + interfaces** | SessionService / ProjectService / ProviderService / AgentRunService + REST + WS 帧处理 | MockMvc/WS 集成测试：创建会话→发消息→WS 收事件→审批放行→历史可查 |
+| **M6 application + interfaces** | SessionService / ProjectService / ProviderService / AgentRunService（含能力声明不一致审计，M21）+ REST + WS 帧处理 | MockMvc/WS 集成测试：创建会话→发消息→WS 收事件→审批放行→历史可查 |
 | **M7 bootstrap + CLI** | `@AutoConfiguration` 装配（内存实现 vs DB 实现的 `@ConditionalOnMissingBean` 优先级）、provider 合并装配、headless CLI 入口（`web-application-type=none` + 单次执行） | Server 起得来；CLI `opencoding run "..."` 在同一容器内单会话跑完退出 |
 | **M8 fork/export/import + 插件 SPI + Gemini/Ollama** | `SessionExport`/`import` + zip 媒体打包 + ServiceLoader 插件发现 + Gemini/Ollama 适配器 | fork 后历史一致；export→删库→import 还原 100%；插件 jar 丢 classpath 即生效 |
 
@@ -1572,7 +1577,7 @@ sequenceDiagram
 |---|---|---|
 | 中文 token 低估（"字符数/4"） | 压缩永不触发，长中文会话直接撞上下文上限 | 用 CJK 加权估算（§7.2） |
 | Gemini `functionDeclarations` 只支持 JSON Schema 子集 | 复杂工具参数（嵌套/枚举）可能被拒 | 定义 schema 降级器：剥离 `$schema`/`additionalProperties`/`oneOf`，必要时转"提示词 + 校验" |
-| OpenAI 双 API（Chat Completions vs Responses） | 两套映射维护成本 | v1 以 Chat Completions 为主线；Responses 仅作 native state 加速的可选实现 |
+| OpenAI 双 API（Chat Completions vs Responses） | 两套映射维护成本 | v1 以 Chat Completions 为主线；Responses 建模已定（M22：独立 `ProtocolType.OPENAI_RESPONSES` 适配器家族，详见详设 §12 协议演进政策），实现 v1.1+ |
 | 流式 delta 不落库 | 断线重连丢失"正在生成"的内容 | 已确认接受（D34）；UI 文案需明确"以最终消息为准" |
 | ServiceLoader 插件拥有完整 JVM 权限 | 恶意插件可读任意文件 | JVM SecurityManager 已废弃；靠"信任边界 + 文档声明 + 企业场景白名单加载"，不承诺沙箱 |
 | 插件与默认实现同 id 冲突 | 装配不确定 | 显式优先级：Spring `@ConditionalOnMissingBean`（低 order 插件不覆盖显式 bean） > ServiceLoader `order()` 升序 |

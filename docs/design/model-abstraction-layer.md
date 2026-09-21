@@ -1,6 +1,6 @@
 # OpenCoding 模型抽象层 — 详细设计 v2.0
 
-> 状态：**设计已定稿（M1–M20），待你审阅确认；代码未改动**
+> 状态：**设计已定稿（M1–M22），待你审阅确认；代码未改动**
 > 日期：2026-09-14
 > 定位：本文是模型抽象层的**唯一权威依据**，覆盖并取代 `core-api-contract-and-model-adapter.md` 的 §5.2 / §5.3 / §5.4 / §5.5 / §5.8 / §5.10 / §6 / §7.1。
 > 范围：`core-api` 的模型相关契约 + `core-model` 全部实现 + `core-implementation` 的装配与默认实现 + `core-agent` 的单轮执行与调用侧。
@@ -31,6 +31,8 @@
 | M18 | 会话并发 | 会话级单飞守卫 + 策略可配（`QUEUE` 默认 / `REJECT` / `CANCEL`） |
 | M19 | 装饰器扩展 | `ModelDecorator` SPI，插件可插入横切装饰器（配额/计量/trace/合规） |
 | M20 | 音频粒度 | `ModelCapability` 新增 `SPEECH_TO_TEXT` / `TEXT_TO_SPEECH`，**保留 `AUDIO` 作为聚合展示位**；`SpeechToTextModel` / `TextToSpeechModel` 接口独立 |
+| M21 | 能力声明一致性 | 装配期 `DefaultModelFactory` 双向比对「模态接口 ⇔ `descriptor().capabilities()`」（over-claim / under-claim 均报），WARN 按 (providerKey, modelId) 进程内去重、启动/reload 预热全量覆盖；不一致模型在会话内首次使用时落 `oc_agent_event(MODEL_CAPABILITY_MISMATCH)`；**不 FAIL、不自动改配置**（与 M16 同原则）；范围仅模态轴 |
+| M22 | Responses 建模 | `ProtocolType` 新增 `OPENAI_RESPONSES`（`OPENAI` 语义收敛为 Chat Completions 主线），按「新协议 = 5 个小类」独立适配器家族接入；加速语义走 `nativeStateToken` / `previous_response_id`（M15）；实现排 v1.1+（§13 口径不变）；空壳类清除，不留半成品 |
 
 ---
 
@@ -106,6 +108,27 @@
 - 两层基座：`AbstractAiModel`（持 provider + descriptor 快照、实现 `unwrap`）→ 每模态 `AbstractXxxModel`；`AbstractChatModel` 额外提供 `require()` 能力校验与 `collect()` 流式聚合兜底。
 - 每个协议的具体 Model 只做编排（约 40 行），协议差异全部下沉到三件套 Mapper（Request / Response / Stream）与 `OptionsCodec`；流式累加器在 `StreamMapper` 内部（M12）。
 - **新增第 5 个协议 = 新增 5 个小类**，基类、接口、Registry、上层代码零改动。
+
+**包结构（冻结）**：
+
+```
+com.hk.opencoding.core.model
+├─ base/                        # 协议无关骨架：插件 / 新协议的继承面
+│    AbstractAiModel            # provider + descriptor 快照、unwrap 默认实现
+│    AbstractChatModel          # require() + collect() 兜底 + chat() = collect(stream())
+│    AbstractEmbeddingModel / AbstractImageModel / AbstractVideoModel
+└─ specific/{protocol}/         # D6：厂商官方 SDK 只允许出现在这里；一协议一包
+     anthropic/  AnthropicChatModel + Request/Response/Stream Mapper + OptionsCodec + ClientFactory
+     openai/     OpenAIChatModel + …（OPENAI_COMPATIBLE 复用）
+     gemini/     GeminiChatModel + …
+     ollama/     OllamaChatModel + …（无 SDK，自封装 HTTP）
+```
+
+放置规则（评审 / 依赖检查可验）：
+
+1. `base/` 零厂商 SDK import（`com.anthropic.*` / `com.openai.*` / `com.google.genai.*`）——「新增协议 = 5 个小类、基类零改动」的可验证前提。
+2. 协议耦合只允许在 `specific/{protocol}/`；每协议 Model + 三件套 Mapper + `OptionsCodec` + `ClientFactory` 同包存放，不按类角色再分子包；流式累加器在 `XxxStreamMapper` 内（M12），不建独立包。
+3. 退场项：`AbstractStreamingChatModel`（M7 删除）、`XxxProvider` 类（provider 为 core-api 纯配置实体，SDK client 归 `specific/*/XxxClientFactory`，随 M2 重写退场）；speech 基座按需（v1 无适配器，M20 只冻结接口）。
 
 ### 3.4 调用侧（core-agent + core-implementation）
 
@@ -467,6 +490,8 @@ effectiveChatOptions  ──▶ ChatRequest.options
 
 校验由 `CapabilityGuard` 装饰器执行（**请求发出前**，不烧 token，M16 前半）。
 
+装配期另有类型 ⇔ 能力声明一致性自检（M21）：`DefaultModelFactory` 双向比对实现类模态与 `capabilities()`（over-claim / under-claim 均报），WARN 去重；不一致模型在会话内首次使用时落 `oc_agent_event(MODEL_CAPABILITY_MISMATCH)`。
+
 ### 5.2 providerOptions 组装规则
 
 ```java
@@ -629,6 +654,7 @@ public interface OpenCodingExtension {
 | `ChatRequest.previousResponseId` | 协议字段，移入 `providerOptions`（M4） |
 | `ChatSession.send()/stream()` | 执行归 `ChatTurnExecutor`（M9） |
 | `ModelProvider.getModels() : List<AiModel>` | 配置实体不得持有运行时实例（M2） |
+| `AbstractModelProvider` + 5 个厂商 `XxxProvider` 子类 | 可变字段基类 + 每厂商子类属第三种配置形态；厂商差异是数据（`protocol` 字段 + yaml 默认值），随 M1.2 清退（零引用） |
 
 ### 9.2 新增强化
 
@@ -655,11 +681,13 @@ public interface OpenCodingExtension {
 
 ## 10. 已确认项与剩余默认项
 
-### 10.1 已确认（原待确认项 1）
+### 10.1 已确认项
 
 | 事项 | 结论 |
 |---|---|
 | `ModelCapability` 音频粒度 | **M20 已定**：新增 `SPEECH_TO_TEXT` / `TEXT_TO_SPEECH`，**保留 `AUDIO` 作为聚合展示位**；接口侧 `SpeechToTextModel` / `TextToSpeechModel` 独立 |
+| 类型 ⇔ 能力声明一致性 | **M21 已定**：装配期 WARN（over-claim / under-claim 双向校验、按 (providerKey, modelId) 去重）+ 会话内首次使用落 `oc_agent_event(MODEL_CAPABILITY_MISMATCH)`；不 FAIL、不自动改配置 |
+| OpenAI Responses 建模 | **M22 已定**：独立 `ProtocolType.OPENAI_RESPONSES` 枚举值 + 独立适配器家族；实现 v1.1+（协议演进政策见 §12） |
 
 ### 10.2 剩余默认项（不阻塞，按建议执行，可随时推翻）
 
@@ -676,16 +704,37 @@ public interface OpenCodingExtension {
 
 | 步骤 | 内容 | 验收 |
 |---|---|---|
-| M1.1 | `error` + `usage` + 三个公共基座 + `model` 接口树（含 `unwrap`） | 编译通过；`core-api` 无 Spring 依赖（`dependency:tree` 验证） |
-| M1.2 | `provider` / `ModelDescriptor` / 三个 SPI（`ModelProviderRegistry` / `ModelFactory` / `ModelDecorator` / `ModelRegistry`） | 接口签名冻结，写契约测试（record 相等性、`unwrap` 默认返回 empty） |
+| M1.1 | `error` + `usage` + 三个公共基座 + `model` 接口树（含 `unwrap`；**删除 `model/capable/*`**，M6） | 编译通过；`core-api` 无 Spring 依赖（`dependency:tree` 验证）；`model.capable` 零残留引用 |
+| M1.2 | `provider` / `ModelDescriptor` / 三个 SPI（`ModelProviderRegistry` / `ModelFactory` / `ModelDecorator` / `ModelRegistry`）；清退骨架 `AbstractModelProvider` + 5 个 `XxxProvider` | 接口签名冻结，写契约测试（record 相等性、`unwrap` 默认返回 empty） |
 | M1.3 | 消息与内容（`Message` sealed + `ContentPart` sealed + `MediaRef` + `Messages` 工厂） | sealed 穷举编译通过；`ContentPartType` 收敛为 6 值 |
 | M1.4 | 请求/响应/流式事件（record + sealed，`ChatRequest.Builder`） | `StreamCompleted` 承载完整消息的契约测试 |
 | M2.1 | `AbstractAiModel` + `AbstractChatModel`（`collect` 兜底 + `require`） | 用一个假适配器（stub client）验证：只实现 `stream()` 也能跑 `chat()` |
-| M2.2 | `CapabilityGuard` + `RetryingChatModel` + `DefaultModelFactory` + `CachingModelRegistry` | 单测：不支持能力时报 `UNSUPPORTED_CAPABILITY` 且不发请求；429 重试 3 次后成功；401 不重试 |
+| M2.2 | `CapabilityGuard` + `RetryingChatModel` + `DefaultModelFactory` + `CachingModelRegistry` | 单测：不支持能力时报 `UNSUPPORTED_CAPABILITY` 且不发请求；429 重试 3 次后成功；401 不重试；声明一致性自检双向告警且 WARN 去重（M21） |
 | M2.3 | `AnthropicChatModel` + 4 个 Mapper/Codec | 对真实 key：非流式、流式、tool calling 往返、thinking、用量归一 |
 | M2.4 | `OpenAIChatModel`（含 `OPENAI_COMPATIBLE`） | 对 DeepSeek/智谱接一个兼容端点验证「仅换 baseUrl 即可用」 |
 | M2.5 | `DefaultChatRequestAssembler` + `DefaultChatTurnExecutor` | 三级合并优先级测试；切换模型后 `previous_response_id` 为 null |
 | M2.6 | `DefaultChatSession`（单飞守卫）+ `InMemoryConversationStore` | `QUEUE`/`REJECT`/`CANCEL` 三种策略的并发测试 |
+
+---
+
+## 12. 协议演进政策
+
+> 触发场景：新增协议（OpenAI Responses，M22）、厂商升级换代（如 Anthropic 新协议）、兼容端点接入。目的：新老协议过渡期**无缝并存**，且新增协议**零扩散**。
+
+**六条纪律**：
+
+1. **只增不改**：新协议 = 新 `ProtocolType` 枚举值 + 新适配器家族（`specific/{protocol}/`：一个 Model + 三件套 Mapper + `OptionsCodec` + `ClientFactory`）。既有枚举值语义冻结、老适配器零改动；`ModelFactory` 加一个 case，基类 / Registry / 上层零改动。
+2. **过渡期并存**：同一厂商新旧协议各挂一条 provider 数据（如 `anthropic-main` / `anthropic-next`），`protocol` 是配置字段、`enabled` 做灰度；UI / CLI 只呈现数据，不做协议判断。
+3. **会话锁定**：会话持 `providerKey + modelId` 快照（落 `oc_agent_run`），跑在旧协议上的会话不被新协议上线波及；迁移 = 显式 `switchModel()` → `nativeStateToken` 作废 + 全量重放 + `MODEL_SWITCHED` 审计（M15）。
+4. **能力差异显性化**：新协议新能力走 `providerOptions` 透传 + descriptor 能力位声明；不支持的能力由 `CapabilityGuard` 请求前拦截 `UNSUPPORTED_CAPABILITY`（M16），**不静默降级**。
+5. **逃生舱**：canonical 盖不住的协议独有能力用 `unwrap(Class<T>)` 受控取出（M17），不扩 canonical。
+6. **退役 = 数据下线 → 删家族**：先 yaml/DB 数据下线（`enabled=false` / 删条目 + `reload()`）；一个版本周期后删枚举值 + 适配器家族，让残留引用在编译期暴露。
+
+**三条反模式（禁止）**：
+
+- 协议字段进 canonical：每个新协议都会触发核心契约改动、上层全部重编译——协议专属参数一律 `providerOptions`（M4）。
+- 自动探测厂商能力 / 静默降级：声明为准（M16）。
+- Model 编排层写 `if (protocol)`：协议差异只能下沉到 Mapper / Codec（M7）。
 
 ---
 
