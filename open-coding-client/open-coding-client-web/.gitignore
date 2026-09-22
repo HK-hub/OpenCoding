@@ -6,3 +6,7 @@ dist-ssr/
 .recon-npm-install.log
 .DS_Store
 *.tsbuildinfo
+*.log
+tmp/
+.cache/
+temp/
