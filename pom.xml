@@ -21,6 +21,7 @@
         <module>open-coding-application</module>
         <module>open-coding-interfaces</module>
         <module>open-coding-plugin</module>
+        <module>open-coding-client</module>
     </modules>
 
     <!-- =========================================================== -->

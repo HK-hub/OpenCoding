@@ -1,0 +1,356 @@
+/**
+ * 设计令牌与全局样式（TDesign 主题之上的一层工作台样式）。
+ * 对应 harness 无障碍要求：正文对比度 ≥4.5:1、焦点环 ≥3:1、减少动效、字号缩放 80–150%。
+ */
+
+:root {
+  /* 工作台布局令牌 */
+  --oc-shell-header-h: 48px;
+  --oc-shell-sidebar-w: 224px;
+  --oc-shell-sidebar-collapsed-w: 56px;
+  --oc-shell-rail-w: 320px;
+  --oc-shell-statusbar-h: 30px;
+  --oc-shell-tabbar-h: 36px;
+
+  /* 语义色（与 TDesign 变量对齐，缺失时兜底） */
+  --oc-bg-page: var(--td-bg-color-page, #f3f3f3);
+  --oc-bg-container: var(--td-bg-color-container, #ffffff);
+  --oc-bg-elevated: var(--td-bg-color-container-hover, #f9f9f9);
+  --oc-border: var(--td-component-stroke, #e7e7e7);
+  --oc-border-strong: var(--td-component-border, #dcdcdc);
+
+  --oc-risk-r0: #4b9e6a;
+  --oc-risk-r1: #7aab4b;
+  --oc-risk-r2: #d9a300;
+  --oc-risk-r3: #e07b39;
+  --oc-risk-r4: #d54941;
+  --oc-risk-r5: #a51f1f;
+
+  --oc-sev-info: #0052d9;
+  --oc-sev-ok: #2ba471;
+  --oc-sev-warn: #e37318;
+  --oc-sev-error: #d54941;
+  --oc-sev-critical: #8e1d1d;
+
+  --oc-mono: 'JetBrains Mono', 'Cascadia Mono', Consolas, 'Courier New', monospace;
+  --oc-motion: 200ms cubic-bezier(0.38, 0, 0.24, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --oc-motion: 0ms linear;
+  }
+}
+
+html[data-motion='reduced'] {
+  --oc-motion: 0ms linear;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: var(--td-font-family, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif);
+  font-size: 14px;
+  color: var(--td-text-color-primary, #181818);
+  background: var(--oc-bg-page);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 字号缩放（无障碍：80%–150%） */
+html {
+  --oc-font-scale: 1;
+  font-size: calc(16px * (var(--oc-font-scale) - 1) + 16px);
+}
+
+/* 焦点环统一：可见且 ≥3:1 */
+:focus-visible {
+  outline: 2px solid var(--td-brand-color, #0052d9);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* 滚动条收敛 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--td-scrollbar-color, rgba(0, 0, 0, 0.16));
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* 通用排版工具 */
+.oc-mono {
+  font-family: var(--oc-mono);
+  font-size: 12px;
+}
+
+.oc-muted {
+  color: var(--td-text-color-placeholder, #8f8f8f);
+}
+
+.oc-secondary {
+  color: var(--td-text-color-secondary, #666666);
+}
+
+.oc-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.oc-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.oc-page {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+  min-height: 0;
+}
+
+.oc-page__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.oc-page__title {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 26px;
+  margin: 0;
+}
+
+.oc-page__desc {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--td-text-color-secondary, #666666);
+  max-width: 900px;
+}
+
+.oc-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.oc-grid--2 {
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+}
+
+.oc-grid--3 {
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.oc-grid--4 {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.oc-card {
+  background: var(--oc-bg-container);
+  border: 1px solid var(--oc-border);
+  border-radius: 6px;
+  padding: 14px 16px;
+}
+
+.oc-card__title {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0 0 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.oc-kv {
+  display: grid;
+  grid-template-columns: minmax(96px, max-content) 1fr;
+  gap: 6px 12px;
+  font-size: 13px;
+}
+
+.oc-kv__k {
+  color: var(--td-text-color-secondary, #666666);
+}
+
+.oc-flex {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.oc-flex--between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.oc-flex--wrap {
+  flex-wrap: wrap;
+}
+
+.oc-grow {
+  flex: 1;
+  min-width: 0;
+}
+
+.oc-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.oc-divider {
+  height: 1px;
+  background: var(--oc-border);
+  margin: 10px 0;
+}
+
+.oc-pre {
+  margin: 0;
+  padding: 10px 12px;
+  background: var(--td-bg-color-secondarycontainer, #f3f3f3);
+  border: 1px solid var(--oc-border);
+  border-radius: 4px;
+  font-family: var(--oc-mono);
+  font-size: 12px;
+  line-height: 18px;
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 320px;
+  overflow: auto;
+}
+
+.oc-cli {
+  font-family: var(--oc-mono);
+  font-size: 12px;
+  background: var(--td-bg-color-secondarycontainer, #f3f3f3);
+  border: 1px dashed var(--oc-border-strong);
+  border-radius: 4px;
+  padding: 1px 6px;
+  color: var(--td-text-color-secondary, #666666);
+}
+
+/* diff 视图 */
+.oc-diff {
+  font-family: var(--oc-mono);
+  font-size: 12px;
+  line-height: 18px;
+  border: 1px solid var(--oc-border);
+  border-radius: 4px;
+  overflow: auto;
+}
+
+.oc-diff__row {
+  display: flex;
+  gap: 8px;
+  padding: 0 8px;
+  white-space: pre;
+}
+
+.oc-diff__row--add {
+  background: rgba(43, 164, 113, 0.12);
+  color: #1f6b47;
+}
+
+.oc-diff__row--del {
+  background: rgba(213, 73, 65, 0.12);
+  color: #8e2b26;
+}
+
+.oc-diff__row--ctx {
+  color: var(--td-text-color-secondary, #666666);
+}
+
+.oc-diff__ln {
+  width: 44px;
+  flex: none;
+  text-align: right;
+  color: var(--td-text-color-placeholder, #8f8f8f);
+  user-select: none;
+}
+
+/* 流式光标 */
+.oc-caret::after {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 14px;
+  margin-left: 2px;
+  vertical-align: -2px;
+  background: var(--td-brand-color, #0052d9);
+  animation: oc-blink 1s steps(2, start) infinite;
+}
+
+@keyframes oc-blink {
+  to {
+    visibility: hidden;
+  }
+}
+
+/* 骨架微光（减少动效时禁用） */
+@media (prefers-reduced-motion: no-preference) {
+  .oc-shimmer {
+    background: linear-gradient(90deg, rgba(0, 0, 0, 0.04) 25%, rgba(0, 0, 0, 0.08) 37%, rgba(0, 0, 0, 0.04) 63%);
+    background-size: 400% 100%;
+    animation: oc-shimmer 1.4s ease infinite;
+  }
+}
+
+@keyframes oc-shimmer {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0 50%;
+  }
+}
+
+/* 屏幕阅读器专用文本 */
+.oc-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* TDesign 细节微调：让工作台更紧凑 */
+.t-default-menu {
+  --td-menu-width: var(--oc-shell-sidebar-w);
+}
+
+.t-table__cell {
+  word-break: break-word;
+}
+
+.t-descriptions__label {
+  white-space: nowrap;
+}

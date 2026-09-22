@@ -1,0 +1,36 @@
+{
+  "name": "open-coding-client-web",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "description": "OpenCoding Harness Web Client — Vue 3 + TDesign Vue Next",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit -p tsconfig.app.json && vite build",
+    "build:only": "vite build",
+    "preview": "vite preview",
+    "typecheck": "vue-tsc --noEmit -p tsconfig.app.json",
+    "check:routes": "node scripts/check-routes.mjs",
+    "check:templates": "node scripts/check-templates.mjs",
+    "check:data": "node scripts/check-data.mjs",
+    "audit:views": "node scripts/audit-views.mjs",
+    "matrix": "node scripts/gen-matrix.mjs",
+    "verify": "npm run check:templates && npm run typecheck && npm run check:routes && npm run build:only"
+  },
+  "dependencies": {
+    "@tdesign-vue-next/chat": "^0.7.0",
+    "dayjs": "^1.11.23",
+    "pinia": "^3.0.4",
+    "tdesign-icons-vue-next": "^0.4.11",
+    "tdesign-vue-next": "^1.20.8",
+    "vue": "^3.5.43",
+    "vue-router": "^4.6.4"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.9",
+    "sass": "^1.104.1",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.6",
+    "vue-tsc": "^3.3.11"
+  }
+}
