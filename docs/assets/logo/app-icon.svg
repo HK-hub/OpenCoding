@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-labelledby="t">
+  <title id="t">Open Agent — app icon</title>
+  <rect width="160" height="160" rx="36" fill="#0B1120"/>
+  <g fill="none" stroke-width="20" stroke-linecap="round">
+    <path d="M122.87 70.1A44 44 0 0 1 82.64 123.92" stroke="#2F6BFF"/>
+    <path d="M84.01 123.82A44 44 0 0 1 36.18 75.99" stroke="#8B5CF6"/>
+    <path d="M36.08 77.36A44 44 0 0 1 89.9 37.13" stroke="#12C2C2"/>
+  </g>
+  <circle cx="90.61" cy="69.39" r="10" fill="#FFFFFF"/>
+</svg>
