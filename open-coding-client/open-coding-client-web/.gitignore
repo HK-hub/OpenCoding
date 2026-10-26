@@ -10,3 +10,8 @@ dist-ssr/
 tmp/
 .cache/
 temp/
+# 代理验证产物与临时脚本
+dist-*/
+.tmp*
+_debug*.mjs
+_probe*.mjs

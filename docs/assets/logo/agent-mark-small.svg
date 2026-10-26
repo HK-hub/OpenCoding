@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="25 25 110 110" role="img" aria-labelledby="t">
+  <title id="t">Open Agent — small-size mark (16–24px)</title>
+  <g fill="none" stroke-width="22" stroke-linecap="butt">
+    <path d="M122.87 70.1A44 44 0 0 1 82.64 123.92" stroke="#2F6BFF"/>
+    <path d="M84.01 123.82A44 44 0 0 1 36.18 75.99" stroke="#8B5CF6"/>
+    <path d="M36.08 77.36A44 44 0 0 1 89.9 37.13" stroke="#12C2C2"/>
+  </g>
+  <circle cx="90.61" cy="69.39" r="11" fill="#0F172A"/>
+</svg>

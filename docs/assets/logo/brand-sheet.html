@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>Open Agent Mark — 标识提案</title>
+<style>
+  :root{
+    --ink:#0F172A; --ink-2:#334155; --mute:#64748B; --line:#E2E8F0;
+    --paper:#FFFFFF; --bg:#F5F7FA; --night:#0B1120;
+    --blue:#2F6BFF; --violet:#8B5CF6; --teal:#12C2C2;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Segoe UI","PingFang SC","Microsoft YaHei",system-ui,sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1080px;margin:0 auto;padding:56px 48px 80px}
+  .eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--mute)}
+  h1{font-size:30px;font-weight:650;letter-spacing:-.02em;margin:10px 0 6px}
+  .lede{font-size:14px;line-height:1.7;color:var(--ink-2);max-width:620px}
+
+  .hero{display:flex;align-items:center;gap:56px;background:var(--paper);border-radius:24px;padding:48px;margin-top:32px;box-shadow:0 1px 2px rgba(15,23,42,.05),0 24px 48px -32px rgba(15,23,42,.4)}
+  .hero svg{flex:0 0 auto}
+  .hero h2{font-size:19px;font-weight:620;margin-bottom:14px}
+  .hero ul{list-style:none;display:grid;gap:11px}
+  .hero li{font-size:13.5px;line-height:1.65;color:var(--ink-2);display:flex;gap:10px}
+  .hero li b{color:var(--ink);font-weight:620}
+  .dot{width:7px;height:7px;border-radius:2px;flex:0 0 auto;margin-top:7px}
+
+  section{margin-top:40px}
+  .h{display:flex;align-items:baseline;gap:12px;margin-bottom:16px}
+  .h h3{font-size:14px;font-weight:620;letter-spacing:.01em}
+  .h span{font-size:12px;color:var(--mute)}
+  .grid{display:grid;gap:16px}
+  .g4{grid-template-columns:repeat(4,1fr)}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  .g2{grid-template-columns:1.2fr 1fr}
+  .card{background:var(--paper);border-radius:16px;padding:24px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;box-shadow:0 1px 2px rgba(15,23,42,.05),0 16px 32px -28px rgba(15,23,42,.5)}
+  .card.dark{background:var(--night)}
+  .lbl{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+  .card.dark .lbl{color:#64748B}
+  .sizes{display:flex;align-items:flex-end;gap:26px}
+  .size{display:flex;flex-direction:column;align-items:center;gap:10px}
+  .size em{font-style:normal;font-size:10px;color:var(--mute)}
+
+  .sw{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+  .chip{background:var(--paper);border-radius:14px;padding:14px;box-shadow:0 1px 2px rgba(15,23,42,.05)}
+  .chip .b{height:56px;border-radius:9px;margin-bottom:10px}
+  .chip .n{font-size:12.5px;font-weight:620}
+  .chip .v{font-size:11px;color:var(--mute);letter-spacing:.04em;font-variant-numeric:tabular-nums}
+  .chip .u{font-size:11px;color:var(--ink-2);margin-top:4px}
+
+  .dont{position:relative;overflow:hidden}
+  .dont::after{content:"";position:absolute;inset:0;background:linear-gradient(to top right,transparent calc(50% - .6px),#EF4444 calc(50% - .6px),#EF4444 calc(50% + .6px),transparent calc(50% + .6px));opacity:.55}
+
+  .tabs{display:flex;gap:8px;align-items:center;background:#fff;border-radius:12px;padding:10px 14px;box-shadow:0 1px 2px rgba(15,23,42,.06);font-size:12px;color:var(--mute)}
+  .tab{display:flex;align-items:center;gap:7px;padding:6px 10px;border-radius:8px;background:#F1F5F9;color:var(--ink-2)}
+  .foot{margin-top:44px;font-size:12px;color:var(--mute);line-height:1.8}
+  code{font-family:ui-monospace,Consolas,monospace;font-size:11.5px;color:var(--ink-2)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">Logo Proposal · 01</div>
+  <h1>Open Core — 开口环</h1>
+  <p class="lede">一段 296° 的三色环，右上留出 64° 开口，内核朝开口偏移。三件事同时说清：边界是开放的、能力被拆成可替换的模块、Agent 始终在系统中心并且可以走出去。</p>
+
+  <div class="hero">
+    <svg width="230" height="230" viewBox="26 26 108 108" aria-label="primary mark">
+      <g fill="none" stroke-width="20" stroke-linecap="round">
+        <path d="M122.87 70.1A44 44 0 0 1 82.64 123.92" stroke="#2F6BFF"/>
+        <path d="M84.01 123.82A44 44 0 0 1 36.18 75.99" stroke="#8B5CF6"/>
+        <path d="M36.08 77.36A44 44 0 0 1 89.9 37.13" stroke="#12C2C2"/>
+      </g>
+      <circle cx="90.61" cy="69.39" r="10" fill="#0F172A"/>
+    </svg>
+    <div>
+      <h2>构成逻辑</h2>
+      <ul>
+        <li><i class="dot" style="background:#2F6BFF"></i><span><b>开口</b>：环不闭合。任何内容、任何功能都能从这里接入或长出。</span></li>
+        <li><i class="dot" style="background:#8B5CF6"></i><span><b>三段</b>：Coding / Design / Work 是同一系统的三个可替换模块，不是三个产品。</span></li>
+        <li><i class="dot" style="background:#12C2C2"></i><span><b>偏移内核</b>：Agent 不在正中等待，而是朝边界移动——能接管任意环节。</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <section>
+    <div class="h"><h3>变体</h3><span>同一几何，按场景替换填充</span></div>
+    <div class="grid g4">
+      <div class="card">
+        <svg width="104" height="104" viewBox="26 26 108 108">
+          <g fill="none" stroke-width="20" stroke-linecap="round">
+            <path d="M122.87 70.1A44 44 0 0 1 82.64 123.92" stroke="#2F6BFF"/>
+            <path d="M84.01 123.82A44 44 0 0 1 36.18 75.99" stroke="#8B5CF6"/>
+            <path d="M36.08 77.36A44 44 0 0 1 89.9 37.13" stroke="#12C2C2"/>
+          </g>
+          <circle cx="90.61" cy="69.39" r="10" fill="#0F172A"/>
+        </svg>
+        <div class="lbl">Primary</div>
+      </div>
+      <div class="card">
+        <svg width="104" height="104" viewBox="26 26 108 108" color="#0F172A">
+          <g fill="none" stroke="currentColor" stroke-width="20" stroke-linecap="round">
+            <path d="M122.87 70.1A44 44 0 0 1 82.64 123.92"/>
+            <path d="M84.01 123.82A44 44 0 0 1 36.18 75.99"/>
+            <path d="M36.08 77.36A44 44 0 0 1 89.9 37.13"/>
+          </g>
+          <circle cx="90.61" cy="69.39" r="10" fill="currentColor"/>
+        </svg>
+        <div class="lbl">One color</div>
+      </div>
+      <div class="card dark">
+        <svg width="104" height="104" viewBox="26 26 108 108" color="#FFFFFF">
+          <g fill="none" stroke="currentColor" stroke-width="20" stroke-linecap="round">
+            <path d="M122.87 70.1A44 44 0 0 1 82.64 123.92"/>
+            <path d="M84.01 123.82A44 44 0 0 1 36.18 75.99"/>
+            <path d="M36.08 77.36A44 44 0 0 1 89.9 37.13"/>
+          </g>
+          <circle cx="90.61" cy="69.39" r="10" fill="currentColor"/>
+        </svg>
+        <div class="lbl">Inverse</div>
+      </div>
+      <div class="card">
+        <svg width="104" height="104" viewBox="25 25 110 110">
+          <g fill="none" stroke-width="22" stroke-linecap="butt">
+            <path d="M122.87 70.1A44 44 0 0 1 82.64 123.92" stroke="#2F6BFF"/>
+            <path d="M84.01 123.82A44 44 0 0 1 36.18 75.99" stroke="#8B5CF6"/>
+            <path d="M36.08 77.36A44 44 0 0 1 89.9 37.13" stroke="#12C2C2"/>
+          </g>
+          <circle cx="90.61" cy="69.39" r="11" fill="#0F172A"/>
+        </svg>
+        <div class="lbl">Small 16–24px</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="h"><h3>尺寸梯度</h3><span>实尺寸，非缩放预览</span></div>
+    <div class="card" style="align-items:flex-start">
+      <div class="sizes">
+        <div class="size"><svg width="96" height="96" viewBox="26 26 108 108"><g fill="none" stroke-width="20" stroke-linecap="round"><path d="M122.87 70.1A44 44 0 0 1 82.64 123.92" stroke="#2F6BFF"/><path d="M84.01 123.82A44 44 0 0 1 36.18 75.99" stroke="#8B5CF6"/><path d="M36.08 77.36A44 44 0 0 1 89.9 37.13" stroke="#12C2C2"/></g><circle cx="90.61" cy="69.39" r="10" fill="#0F172A"/></svg><em>96</em></div>
+        <div class="size"><svg width="64" height="64" viewBox="26 26 108 108"><g fill="none" stroke-width="20" stroke-linecap="round"><path d="M122.87 70.1A44 44 0 0 1 82.64 123.92" stroke="#2F6BFF"/><path d="M84.01 123.82A44 44 0 0 1 36.18 75.99" stroke="#8B5CF6"/><path d="M36.08 77.36A44 44 0 0 1 89.9 37.13" stroke="#12C2C2"/></g><circle cx="90.61" cy="69.39" r="10" fill="#0F172A"/></svg><em>64</em></div>
+        <div class="size"><svg width="48" height="48" viewBox="26 26 108 108"><g fill="none" stroke-width="20" stroke-linecap="round"><path d="M122.87 70.1A44 44 0 0 1 82.64 123.92" stroke="#2F6BFF"/><path d="M84.01 123.82A44 44 0 0 1 36.18 75.99" stroke="#8B5CF6"/><path d="M36.08 77.36A44 44 0 0 1 89.9 37.13" stroke="#12C2C2"/></g><circle cx="90.61" cy="69.39" r="10" fill="#0F172A"/></svg><em>48</em></div>
+        <div class="size"><svg width="32" height="32" viewBox="26 26 108 108"><g fill="none" stroke-width="20" stroke-linecap="round"><path d="M122.87 70.1A44 44 0 0 1 82.64 123.92" stroke="#2F6BFF"/><path d="M84.01 123.82A44 44 0 0 1 36.18 75.99" stroke="#8B5CF6"/><path d="M36.08 77.36A44 44 0 0 1 89.9 37.13" stroke="#12C2C2"/></g><circle cx="90.61" cy="69.39" r="10" fill="#0F172A"/></svg><em>32</em></div>
+        <div class="size"><svg width="24" height="24" viewBox="25 25 110 110"><g fill="none" stroke-width="22" stroke-linecap="butt"><path d="M122.87 70.1A44 44 0 0 1 82.64 123.92" stroke="#2F6BFF"/><path d="M84.01 123.82A44 44 0 0 1 36.18 75.99" stroke="#8B5CF6"/><path d="M36.08 77.36A44 44 0 0 1 89.9 37.13" stroke="#12C2C2"/></g><circle cx="90.61" cy="69.39" r="11" fill="#0F172A"/></svg><em>24</em></div>
+        <div class="size"><svg width="16" height="16" viewBox="25 25 110 110"><g fill="none" stroke-width="22" stroke-linecap="butt"><path d="M122.87 70.1A44 44 0 0 1 82.64 123.92" stroke="#2F6BFF"/><path d="M84.01 123.82A44 44 0 0 1 36.18 75.99" stroke="#8B5CF6"/><path d="M36.08 77.36A44 44 0 0 1 89.9 37.13" stroke="#12C2C2"/></g><circle cx="90.61" cy="69.39" r="11" fill="#0F172A"/></svg><em>16</em></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="h"><h3>应用</h3><span>深/浅底应用图标与页签</span></div>
+    <div class="grid g3" style="grid-template-columns:1fr 1fr 1.3fr">
+      <div class="card dark">
+        <svg width="104" height="104" viewBox="0 0 160 160">
+          <rect width="160" height="160" rx="36" fill="#0B1120"/>
+          <g fill="none" stroke-width="20" stroke-linecap="round">
+            <path d="M122.87 70.1A44 44 0 0 1 82.64 123.92" stroke="#2F6BFF"/>
+            <path d="M84.01 123.82A44 44 0 0 1 36.18 75.99" stroke="#8B5CF6"/>
+            <path d="M36.08 77.36A44 44 0 0 1 89.9 37.13" stroke="#12C2C2"/>
+          </g>
+          <circle cx="90.61" cy="69.39" r="10" fill="#FFFFFF"/>
+        </svg>
+        <div class="lbl">App icon · dark</div>
+      </div>
+      <div class="card">
+        <svg width="104" height="104" viewBox="0 0 160 160">
+          <rect width="160" height="160" rx="36" fill="#F1F5F9"/>
+          <g fill="none" stroke-width="20" stroke-linecap="round">
+            <path d="M122.87 70.1A44 44 0 0 1 82.64 123.92" stroke="#2F6BFF"/>
+            <path d="M84.01 123.82A44 44 0 0 1 36.18 75.99" stroke="#8B5CF6"/>
+            <path d="M36.08 77.36A44 44 0 0 1 89.9 37.13" stroke="#12C2C2"/>
+          </g>
+          <circle cx="90.61" cy="69.39" r="10" fill="#0F172A"/>
+        </svg>
+        <div class="lbl">App icon · light</div>
+      </div>
+      <div class="card" style="align-items:stretch;justify-content:center;gap:16px">
+        <div class="tabs">
+          <div class="tab">
+            <svg width="14" height="14" viewBox="25 25 110 110"><g fill="none" stroke-width="22" stroke-linecap="butt"><path d="M122.87 70.1A44 44 0 0 1 82.64 123.92" stroke="#2F6BFF"/><path d="M84.01 123.82A44 44 0 0 1 36.18 75.99" stroke="#8B5CF6"/><path d="M36.08 77.36A44 44 0 0 1 89.9 37.13" stroke="#12C2C2"/></g><circle cx="90.61" cy="69.39" r="11" fill="#0F172A"/></svg>
+            <span>Workspace</span>
+          </div>
+          <div class="tab" style="opacity:.55">Settings</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px">
+          <div style="width:52px;height:52px;border-radius:14px;background:#0B1120;display:flex;align-items:center;justify-content:center">
+            <svg width="30" height="30" viewBox="26 26 108 108"><g fill="none" stroke-width="20" stroke-linecap="round"><path d="M122.87 70.1A44 44 0 0 1 82.64 123.92" stroke="#2F6BFF"/><path d="M84.01 123.82A44 44 0 0 1 36.18 75.99" stroke="#8B5CF6"/><path d="M36.08 77.36A44 44 0 0 1 89.9 37.13" stroke="#12C2C2"/></g><circle cx="90.61" cy="69.39" r="10" fill="#FFFFFF"/></svg>
+          </div>
+          <div class="lbl">Avatar / launcher</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="h"><h3>色板</h3><span>三色为能力标识，墨色为 Agent 本体</span></div>
+    <div class="sw">
+      <div class="chip"><div class="b" style="background:#2F6BFF"></div><div class="n">Coding</div><div class="v">#2F6BFF</div><div class="u">代码 / 执行 / 工具</div></div>
+      <div class="chip"><div class="b" style="background:#8B5CF6"></div><div class="n">Design</div><div class="v">#8B5CF6</div><div class="u">界面 / 生成 / 原型</div></div>
+      <div class="chip"><div class="b" style="background:#12C2C2"></div><div class="n">Work</div><div class="v">#12C2C2</div><div class="u">流程 / 协作 / 交付</div></div>
+      <div class="chip"><div class="b" style="background:#0F172A"></div><div class="n">Ink</div><div class="v">#0F172A</div><div class="u">Agent 内核 / 主文字</div></div>
+      <div class="chip"><div class="b" style="background:#0B1120;border:1px solid #E2E8F0"></div><div class="n">Night</div><div class="v">#0B1120</div><div class="u">深色底 / 图标底</div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="h"><h3>禁区</h3><span>符号自带开口与偏移，不要抵消它</span></div>
+    <div class="grid g3">
+      <div class="card">
+        <svg width="92" height="92" viewBox="0 0 160 160"><g fill="none" stroke-width="20" stroke-linecap="round"><path d="M136 80A56 56 0 1 0 80 136" stroke="#2F6BFF"/><path d="M80 136A56 56 0 0 0 136 80" stroke="#8B5CF6"/></g><circle cx="80" cy="80" r="10" fill="#0F172A"/></svg>
+        <div class="lbl">不要闭合开口</div>
+      </div>
+      <div class="card">
+        <svg width="92" height="92" viewBox="26 26 108 108"><g transform="translate(80 80) scale(1.28 .78) translate(-80 -80)" fill="none" stroke-width="20" stroke-linecap="round"><path d="M122.87 70.1A44 44 0 0 1 82.64 123.92" stroke="#2F6BFF"/><path d="M84.01 123.82A44 44 0 0 1 36.18 75.99" stroke="#8B5CF6"/><path d="M36.08 77.36A44 44 0 0 1 89.9 37.13" stroke="#12C2C2"/></g><ellipse cx="90.61" cy="69.39" rx="12.8" ry="7.8" fill="#0F172A"/></svg>
+        <div class="lbl">不要非等比拉伸</div>
+      </div>
+      <div class="card">
+        <svg width="92" height="92" viewBox="26 26 108 108"><g fill="none" stroke-width="20" stroke-linecap="round"><path d="M122.87 70.1A44 44 0 0 1 82.64 123.92" stroke="#2F6BFF"/><path d="M84.01 123.82A44 44 0 0 1 36.18 75.99" stroke="#8B5CF6"/><path d="M36.08 77.36A44 44 0 0 1 89.9 37.13" stroke="#12C2C2"/></g><circle cx="80" cy="80" r="10" fill="#0F172A"/></svg>
+        <div class="lbl">不要把内核移回正中</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="foot">
+    文件：<code>agent-mark.svg</code> · <code>agent-mark-mono.svg</code> · <code>agent-mark-small.svg</code> · <code>app-icon.svg</code><br>
+    几何：外径 54 / 环宽 20 / 半径 44 / 开口 64°（中心 315°）/ 内核半径 10，偏移 15。
+  </div>
+</div>
+</body>
+</html>
